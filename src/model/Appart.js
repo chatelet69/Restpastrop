@@ -1,11 +1,4 @@
 class Appart {
-    id;
-    owner;
-    title;
-    address;
-    price;
-    status;
-
     constructor(id, title, ...any) {
         this.id = id;
         this.title = title;
