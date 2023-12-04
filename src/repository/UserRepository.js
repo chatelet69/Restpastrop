@@ -9,7 +9,7 @@ class UserRepository {
     }
 
     checkLogin(username, password) {
-        const sqlQuery = "SELECT username, name, lastname, role, email FROM users" 
+        const sqlQuery = "SELECT username, name, lastname, rank, email FROM users" 
             + " WHERE username = ? AND password = ?";
         return new Promise ((resolve, reject) => {
             this.db.query(sqlQuery, [username, password], (error, result) => {

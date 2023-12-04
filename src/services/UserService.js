@@ -1,5 +1,6 @@
 const User              = require("../model/User");
-const UserRepository  = require("../repository/UserRepository");
+const UserRepository    = require("../repository/UserRepository");
+const sha512            = require('js-sha512');
 
 class UserService {
     constructor() {
@@ -8,7 +9,8 @@ class UserService {
 
     authLoginService(username, password) {
         try {
-            const checkLogin = this.userRepository.checkLogin(username, password);
+            const hash = sha512(password);
+            const checkLogin = this.userRepository.checkLogin(username, hash);
         } catch (error) {
             console.log(error);
         }
