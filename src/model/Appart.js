@@ -18,6 +18,16 @@ class Appart {
 
     getSpec() {return this.spec;}
 
+    getChildAdapted() {return this.childAdapted;}
+
+    getWifi() {return this.wifi;}
+
+    getParking() {return this.parking;}
+
+    getBalcon() {return this.balcon;}
+
+    getSmoker() {return this.smoker;}
+
     getTitle() { return this.title; }
 
     getStatus() { return this.status; }
@@ -37,6 +47,16 @@ class Appart {
     setId(newId) { this.id = newId; }
 
     setSpec(...any) { for (const arg of any) this.spec[arg] = arg;}
+
+    setChildAdapted(childAdapted) { this.childAdapted = childAdapted;}
+
+    setWifi(wifi) { this.wifi= wifi;}
+
+    setParking(parking) { this.parking= parking;}
+
+    setBalcon(balcon) { this.balcon= balcon;}
+
+    setSmoker(smoker) { this.smoker= smoker;}
 
     setTitle(newTitle) { this.title = newTitle; }
 
