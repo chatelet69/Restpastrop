@@ -1,5 +1,6 @@
 const mysql = require("mysql2");
 const DatabaseConnection = require("./Database");
+const appartModel= require("../model/Appart");
 
 class AppartRepository {
     db;
@@ -35,9 +36,9 @@ class AppartRepository {
         });
     }
 
-    createAppart(req, res) {
+    async createAppart(req, res) {
         return new Promise ((resolve, reject) => {
-            this.db.query("INSERT INTO apparts (title)", (error, results) => {
+            this.db.query("INSERT INTO apparts (owner, title, address, status, price, area, nb_rooms, max_people) VALUES (?,?,?,?,?,?,?,?)", [req.owner,req.title,req.address,req.status,req.price,req.area,req.nb_rooms,req.max_people], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
             });

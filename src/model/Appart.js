@@ -1,13 +1,7 @@
 class Appart {
-    constructor(id, title, wifi = null, parking = null, childAdapted = null, balcon = null, smoker = null, ...any) {
+    constructor(id, title, ...any) {
         this.id = id;
         this.title = title;
-        spec = array();
-        this.spec['wifi'] = wifi;
-        this.spec['parking'] = parking;
-        this.spec['childAdapted'] = childAdapted;
-        this.spec['balcon'] = balcon;
-        this.spec['smoker'] = smoker;
 
         for (const arg of any) this.arg = arg;
     };

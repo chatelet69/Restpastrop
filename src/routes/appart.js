@@ -6,6 +6,8 @@ const appartRepo        = new AppartRepository();
 const bodyParser        = require('body-parser');
 const cacheMiddleware   = require("../middlewares/cacheMiddleware");
 const AppartController  = require("../controller/AppartController");
+const appartControl        = new AppartController();
+
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -44,4 +46,13 @@ router.get("/apparts/:id", async (req, res) => {
 
 // Post method
 
+router.post("/apparts/create", async (req, res) =>{
+    console.log("Requête reçue sur la route", req.route.path, "| title -> " + req.body.title);
+    try{
+        await appartControl.postAppart(req, res);
+    }catch(error){
+        console.log(error);
+        res.status(500).json({error: `Error during creating appart ${req.body.title}`});
+    }
+});
 module.exports = router;

@@ -5,14 +5,24 @@ class UserController {
         this.userService = new UserService();
     }
 
-    authLogin(req, res) {
+    async authLogin(req, res) {
         try {
             const body = req.body;
-            let res = this.userService.authLoginService(body.username, body.password);
-            res.status(200);res.json({message: "success", jwt: "e"});
+            const resLogin = await this.userService.authLoginService(body.username, body.password);
+            if (resLogin) res.status(200).json({message: "success", jwt: resLogin});
+            else res.status(403).json({message: "error"});
         } catch (error) {
-            console.log(error);
-            res.status(500).json({error: "Error during get appartments"});
+            res.status(500).json({error: "Error during login"});
+        }
+    }
+
+    async myUser(req, res) {
+        try {
+            const userId = req.user.userId;
+            const userData = await this.userService.myUserService(userId);
+            res.status(200).json({message: "logged", user: userData});
+        } catch (error) {
+            res.status(500).json({error: "Error during get my user"});
         }
     }
 }
