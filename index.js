@@ -5,6 +5,11 @@ const fs                = require("fs");
 const path              = require('path');
 const port              = config.apiPort;
 const routesPath        = path.join(__dirname, './src/routes');
+const bodyParser        = require('body-parser');
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.raw());
 
 // Parcourt le répertoire routes afin de charger chaque fichier de route
 fs.readdirSync(routesPath).forEach(file => {
