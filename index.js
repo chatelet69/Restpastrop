@@ -1,5 +1,6 @@
 const express           = require('express');
 const config            = require("./config.json");
+const logMiddleware     = require("./src/middlewares/logMiddleware");
 const app               = express();
 const fs                = require("fs");
 const path              = require('path');
@@ -10,6 +11,9 @@ const bodyParser        = require('body-parser');
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.raw());
+
+// Pour les log les routes requêtées
+app.use(logMiddleware);
 
 // Parcourt le répertoire routes afin de charger chaque fichier de route
 fs.readdirSync(routesPath).forEach(file => {
