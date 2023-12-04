@@ -5,6 +5,7 @@ const AppartRepository  = require("../repository/AppartRepository");
 const appartRepo        = new AppartRepository();
 const bodyParser        = require('body-parser');
 const cacheMiddleware   = require("../middlewares/cacheMiddleware");
+const AppartController  = require("../controller/AppartController");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));

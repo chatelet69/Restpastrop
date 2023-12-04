@@ -34,6 +34,15 @@ class AppartRepository {
             });
         });
     }
+
+    createAppart(req, res) {
+        return new Promise ((resolve, reject) => {
+            this.db.query("INSERT INTO apparts (title)", (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
 }
 
 module.exports = AppartRepository;
