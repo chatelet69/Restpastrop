@@ -1,19 +1,19 @@
 {
-    "name": "restpastrop",
-    "version": "1.0.0",
-    "description": "Projet étudiant api rest",
-    "main": "index.js",
-    "scripts": {
-      "test": "echo \"Error: no test specified\" && exit 1",
-      "start": "nodemon index.js"
-    },
-    "author": "",
-    "license": "ISC",
-    "dependencies": {
-      "express": "^4.18.2",
-      "js-sha512": "^0.8.0",
-      "memory-cache": "^0.2.0",
-      "mysql2": "^3.6.5",
-      "nodemon": "^3.0.2"
-    }
+  "name": "restpastrop",
+  "version": "1.0.0",
+  "description": "Projet étudiant api rest",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "js-sha512": "^0.8.0",
+    "memory-cache": "^0.2.0",
+    "mysql2": "^3.6.5",
+    "nodemon": "^3.0.2"
   }
+}
