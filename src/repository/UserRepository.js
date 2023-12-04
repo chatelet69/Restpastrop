@@ -7,7 +7,7 @@ class UserRepository {
     constructor() {
         this.db = new DatabaseConnection();
     }
-
+  
     getUserById(userId) {
         const sqlQuery = "SELECT username, name, lastname, rank, email FROM users WHERE id = ?";
         return new Promise((resolve, reject) => {

@@ -8,7 +8,7 @@ class UserService {
     constructor() {
         this.userRepository = new UserRepository();
     }
-
+  
     async authLoginService(username, password) {
         try {
             let authToken = false;
