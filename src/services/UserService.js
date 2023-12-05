@@ -3,6 +3,7 @@ const UserRepository    = require("../repository/UserRepository");
 const sha512            = require('js-sha512');
 const jwt               = require("jsonwebtoken");
 const secret            = require("../../config.json").secretJwt;
+const baseUrl           = require("../../config.json").baseUrl;
 
 class UserService {
     userRepository;
@@ -29,6 +30,30 @@ class UserService {
             let userData = false;
             if (userId != 0) userData = await this.userRepository.getUserById(userId);
             return userData;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async getAllUsersService() {
+        try {
+            let usersData = false;
+            usersData = await this.userRepository.getAllUsers();
+            for (const user in usersData) usersData[user].infos = `${baseUrl}/users/${usersData[user].id}`;
+            return usersData;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async getUserService(userId) {
+        try {
+            let userData = false;
+            userData = await this.userRepository.getUserById(userId);
+            if (userData) return userData;
+            return false;
         } catch (error) {
             console.log(error);
             return false;
