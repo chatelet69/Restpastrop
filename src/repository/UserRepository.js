@@ -1,4 +1,3 @@
-const mysql = require("mysql2");
 const DatabaseConnection = require("./Database");
 
 class UserRepository {
@@ -36,6 +35,16 @@ class UserRepository {
                 if (error) throw (error);
                 resolve(result);
             });
+        });
+    }
+
+    createUser(userData) {
+        const sqlQuery = "INSERT INTO users (username, password, name, lastname, email, rank) VALUES (?,?,?,?,?, 'user')";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, userData, (error, result) => {
+                if (error) throw (error);
+                resolve(result);
+            })
         });
     }
 }
