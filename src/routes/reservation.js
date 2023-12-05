@@ -13,4 +13,6 @@ const reservationController = new ReservationController();
 //ajouter véfication 
 router.post("/reservation", [authMiddleware, authorizationMiddleware] ,reservationController.postReservation);
 
+router.patch('/reservation/canceled', reservationController.cancelReservation);
+
 module.exports = router;

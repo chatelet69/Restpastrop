@@ -33,15 +33,25 @@ class ReservationRepository {
        ;
     }
 
-    async cancelReservation(idReservation){
-        const sql = "UPDATE reservation set status = 'CANCELED' WHERE id = ?";
+    async changeStatus(idReservation, status){
+        const sql = "UPDATE reservation set status = ? WHERE ID = ?";
         return new Promise((resolve, reject) => {
-            this.db.query(sql, [idReservation], (error, results) => {
+            this.db.query(sql, [status, idReservation], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
             });
         });
        ;
+    }
+
+    async getReservationById(id){
+        const sql = "SELECT * FROM reservation WHERE ID = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sql, [id], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
     }
    
 }

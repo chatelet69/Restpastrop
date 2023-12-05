@@ -22,6 +22,17 @@ class ReservationController {
             res.status(500).json({error: `Error during get appart ${req.body.clientId}`});
         }
     }
+
+    async cancelReservation(req, res){
+        const data = {
+            idUser : req.body.idUser,
+            idReservation: req.body.idReservation
+        }
+        const result = await reservationService.cancelReservation(data.idUser, data.idReservation)
+        console.log(data)
+        res.status(200)
+        res.json(result);
+    }
 }
 
 module.exports = ReservationController;

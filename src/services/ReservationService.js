@@ -72,6 +72,20 @@ class ReservationService {
         const result = await reservationRepository.saveReservation(data)
     }
 
+    //
+    async cancelReservation(idUser, idReservation){
+        console.log(idUser)
+        console.log(idReservation)
+        //verifier que c'est bien le user qui a créer la reservation
+        //ou verifier que c'est un admin 
+        //ou vérifier que l'appart appartient au user qui veut supprimer la reservation 
+        // vérifier que la réservation a un status = CANCEL
+
+        const result = await this.reservationRepository.cancelReservation(idReservation)
+        console.log(result)
+
+    }
+
 }
 
 module.exports = ReservationService;
