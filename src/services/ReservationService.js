@@ -1,5 +1,6 @@
 const Reservation               = require("../model/Reservation");
 const ReservationRepository     = require("../repository/ReservationRepository");
+const AppartRepository     = require("../repository/AppartRepository");
 const moment                    = require("moment");
 
 class ReservationService {
@@ -7,6 +8,7 @@ class ReservationService {
 
     constructor() {
         this.reservationRepository = new ReservationRepository();
+        this.appartRepository = new AppartRepository();
     }
 
     async bookAppart(data) {
@@ -31,11 +33,21 @@ class ReservationService {
             const result = await this.checkAvailabilityAppart(data.idAppart, data.endDate,data.startDate)
             console.log(result)
             if (result.isAvailable) {
-                const booked = this.reservationRepository.saveReservation(data)
-                return {
-                    message: 'appart booked',
-                    reservationId: booked.id
+                const res = await this.appartRepository.getAppartById(data.idAppart)
+                if (res==0){
+                    return {
+                        message: "l'appart n'existe pas"
+                        
+                    }
+                    
+                }else{
+                    const booked = this.reservationRepository.saveReservation(data)
+                    return {
+                        message: 'appart booked',
+                        reservationId: res[0].id
+                    }
                 }
+                
             } else {
                 console.log(`appartment unavailable`)
                 return {
