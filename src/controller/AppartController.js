@@ -10,9 +10,11 @@ class AppartController{
             const body = req.body;
             console.log(body);
             let result = await this.service.createAppart(body, res);
-            if (result) {
+            if (result === "ok") {
                 res.status(200);
                 res.json({message: "success", jwt: "A CHANGER"});
+            }else{
+                res.status(500).json({error: result});
             }
         } catch (error) {
             console.log(error);
