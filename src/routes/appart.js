@@ -55,4 +55,14 @@ router.post("/apparts/create", async (req, res) =>{
         res.status(500).json({error: `Error during creating appart ${req.body.title}`});
     }
 });
+
+router.delete("/apparts/delete/:id", async (req, res) => {
+    console.log("Requête reçue sur la route", req.route.path, " | id => " + req.params.id);
+    try {
+        await appartControl.deleteAppart(req, res);
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({error: `Error during the delete of the appart ${req.params.id}`});
+    }
+})
 module.exports = router;
