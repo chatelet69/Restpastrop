@@ -8,7 +8,7 @@ class UserRepository {
     }
   
     getUserById(userId) {
-        const sqlQuery = "SELECT username, name, lastname, rank, email FROM users WHERE id = ?";
+        const sqlQuery = "SELECT id, username, name, lastname, rank, email FROM users WHERE id = ?";
         return new Promise((resolve, reject) => {
             this.db.query(sqlQuery, [userId], (error, result) => {
                 if (error) throw error;
@@ -24,6 +24,16 @@ class UserRepository {
             this.db.query(sqlQuery, [username, password], (error, result) => {
                 if (error) throw (error);
                 resolve(result[0]);
+            });
+        });
+    }
+
+    getAllUsers() {
+        const sqlQuery = "SELECT id, username FROM users";
+        return new Promise ((resolve, reject) => {
+            this.db.query(sqlQuery, (error, result) => {
+                if (error) throw (error);
+                resolve(result);
             });
         });
     }

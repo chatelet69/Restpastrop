@@ -9,6 +9,7 @@ class UserController {
             if (resLogin) res.status(200).json({message: "success", jwt: resLogin});
             else res.status(403).json({message: "error"});
         } catch (error) {
+            console.log(error);
             res.status(500).json({error: "Error during login"});
         }
     }
@@ -21,6 +22,27 @@ class UserController {
         } catch (error) {
             console.log(error);
             res.status(500).json({error: "Error during get my user"});
+        }
+    }
+
+    async getAllUsers(req, res) {
+        try {
+            const usersData = await userService.getAllUsersService();
+            res.status(200).json({message: "success", users: usersData});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Error during get all users"});
+        }
+    }
+
+    async getUserById(req, res) {
+        try {
+            const userId = req.params.id;
+            const userData = await userService.getUserService(userId);
+            res.status(200).json(userData);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Error during getting the user"});
         }
     }
 
