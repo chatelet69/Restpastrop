@@ -23,8 +23,7 @@ class AppartController{
     
     async deleteAppart(req, res){
         try {
-            const body = req.body;
-            let result = await this.service.deleteAppart(req.params.id, res);
+            let result = await this.service.deleteAppart(req, res);
             if (result === "ok") {
                 res.status(200).json({message: "Appartment deleted"});
             }else{
