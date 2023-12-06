@@ -19,13 +19,13 @@ class AppartService {
                         return "ok";
                     }
                 }else{
-                    res.status(500).json({error: "Invalid id for the owner"});
+                    return "Invalid id for the owner";
                 }
             }else{
-                res.status(500).json({error: "Error during creating appartments, number variables are actually strings"});
+                return "Error during creating appartments, number variables are actually strings";
             }
         }else{
-            res.status(500).json({error: "Error during creating appartments, string variables are actually numbers"});
+            return "Error during creating appartments, string variables are actually numbers";
         }
     }
 

@@ -1,6 +1,6 @@
 const authAdminMiddleware = (req, res, next) => {
     const reqUser = req.user;
-    if (!reqUser || reqUser.role !== "admin") return res.status(403).json({message: "unauthorized"});
+    if (!reqUser || reqUser.rank !== "admin") return res.status(403).json({message: "Unauthorized"});
     next();
 };
 
