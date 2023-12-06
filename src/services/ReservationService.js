@@ -1,6 +1,7 @@
 const Reservation               = require("../model/Reservation");
 const ReservationRepository     = require("../repository/ReservationRepository");
-const AppartRepository     = require("../repository/AppartRepository");
+const AppartRepository          = require("../repository/AppartRepository");
+
 const moment                    = require("moment");
 
 class ReservationService {
@@ -72,20 +73,43 @@ class ReservationService {
         const result = await reservationRepository.saveReservation(data)
     }
 
-    //
-    async cancelReservation(idUser, idReservation){
+    async cancelReservation(idUser, idReservation, isAdmin){
         console.log(idUser)
         console.log(idReservation)
         //verifier que c'est bien le user qui a créer la reservation
-        //ou verifier que c'est un admin 
+        //vérifier que la réservation a un status = CANCEL
         //ou vérifier que l'appart appartient au user qui veut supprimer la reservation 
-        // vérifier que la réservation a un status = CANCEL
 
-        const result = await this.reservationRepository.cancelReservation(idReservation)
-        console.log(result)
 
+        //ou verifier que c'est un admin 
+        const resultReservation = await this.reservationRepository.getReservationById(idReservation)
+        const resultAppartUser = await this.appartRepository.getAppartsByOwner(idUser)
+        const id = resultAppartUser.map(item => item.id);
+        const isIdAppartEqual = id.includes(resultReservation[0].appartId)
+    
+        if(resultReservation.length == 0){
+             return {
+                message : "appart doesn't exist"
+             }
+        }else{
+            if (resultReservation[0].status == 'BOOKED'){
+                if(resultReservation[0].clientId == idUser || isIdAppartEqual || isAdmin == true){
+                    const result = await this.reservationRepository.cancelReservation(idReservation)
+                    return {
+                        message : 'reservation CANCELED'
+                    }
+                }else{
+                    return{
+                        message : 'annulation de la reservation impossible'
+                    }
+                }
+            }else{
+                return {
+                    message : 'reservation already canceled'
+                }
+            }
+        }
     }
-
 }
 
 module.exports = ReservationService;

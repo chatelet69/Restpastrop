@@ -25,10 +25,11 @@ class ReservationController {
 
     async cancelReservation(req, res){
         const data = {
-            idUser : req.body.idUser,
-            idReservation: req.body.idReservation
+            idUser : req.user.userId,
+            idReservation: req.body.idReservation,
+            isAdmin : req.user.isAdmin
         }
-        const result = await reservationService.cancelReservation(data.idUser, data.idReservation)
+        const result = await reservationService.cancelReservation(data.idUser, data.idReservation, data.isAdmin)
         console.log(data)
         res.status(200)
         res.json(result);

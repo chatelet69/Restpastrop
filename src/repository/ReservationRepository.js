@@ -43,6 +43,16 @@ class ReservationRepository {
         });
        ;
     }
+
+    async getReservationById(idReservation){
+        const sql = "select * FROM reservation WHERE ID = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sql, [idReservation], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
    
 }
 
