@@ -36,13 +36,31 @@ class AppartRepository {
         });
     }
 
-    async createAppart(req, res) {
+    async getOwnerByAppart(appartId){
+        return new Promise((resolve, reject) => {
+            this.db.query("SELECT owner FROM apparts WHERE id = ?", [appartId], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
+
+    async createAppart(req) {
         return new Promise ((resolve, reject) => {
             this.db.query("INSERT INTO apparts (owner, title, address, status, price, area, nb_rooms, max_people) VALUES (?,?,?,?,?,?,?,?)", [req.owner,req.title,req.address,req.status,req.price,req.area,req.nb_rooms,req.max_people], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
             });
         });
+    }
+
+    async delAppart(id, idOwner){
+        return new Promise ((resolve, reject) => {
+            this.db.query("DELETE FROM apparts WHERE id = ? AND owner = ?", [id, idOwner], (error, results) => {
+                if(error) reject(error);
+                resolve(results);
+            })
+        })
     }
 }
 

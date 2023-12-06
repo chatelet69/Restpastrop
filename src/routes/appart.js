@@ -7,7 +7,9 @@ const bodyParser        = require('body-parser');
 const cacheMiddleware   = require("../middlewares/cacheMiddleware");
 const AppartController  = require("../controller/AppartController");
 const appartControl        = new AppartController();
-
+const authMiddleware            = require("../middlewares/authMiddleware");
+const authorizationMiddleware   = require("../middlewares/authorizationMiddleware");
+const authAdminMiddleware       = require("../middlewares/authAdminMiddleware");
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -46,13 +48,11 @@ router.get("/apparts/:id", async (req, res) => {
 
 // Post method
 
-router.post("/apparts/create", async (req, res) =>{
-    console.log("Requête reçue sur la route", req.route.path, "| title -> " + req.body.title);
-    try{
-        await appartControl.postAppart(req, res);
-    }catch(error){
-        console.log(error);
-        res.status(500).json({error: `Error during creating appart ${req.body.title}`});
-    }
+router.post("/apparts/create", [authMiddleware, authAdminMiddleware], async (req, res) =>{
+    await appartControl.postAppart(req, res);
 });
+
+router.delete("/apparts/delete/:id",[authMiddleware], async (req, res) => {
+    await appartControl.deleteAppart(req, res);
+})
 module.exports = router;
