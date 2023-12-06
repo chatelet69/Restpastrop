@@ -11,7 +11,7 @@ class AppartController{
             res.status(200).json({count: data.length, apparts: data});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during get appartments"});
+            res.status(500).json({error: "Erreur durant la récupération des appartements"});
         }
     }
 
@@ -19,10 +19,10 @@ class AppartController{
         try {
             let data = await this.service.getAppartById(req.params.id);
             if (data) res.status(200).json(data);
-            else res.status(500).json({message: "error"});
+            else res.status(500).json({error: "Erreur durant la récupération de l'appartement"});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Error during get appart ${req.params.id}`});
+            res.status(500).json({error: `Erreur durant la récupération de l'appart ${req.params.id}`});
         }
     }
 
@@ -30,15 +30,11 @@ class AppartController{
         try {
             const body = req.body;
             let result = await this.service.createAppart(body, res);
-            if (result === "ok") {
-                res.status(200);
-                res.json({message: "success"});
-            } else {
-                res.status(500).json({error: result});
-            }
+            if (result === "ok") res.status(200).json({message: "success"});
+            else res.status(500).json({error: result});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during creating appartments"});
+            res.status(500).json({error: "Erreur durant la création de l'appartement"});
         }
     }
     
@@ -46,7 +42,7 @@ class AppartController{
         try {
             let result = await this.service.deleteAppart(req, res);
             if (result === "ok") {
-                res.status(200).json({message: "Appartment deleted"});
+                res.status(200).json({message: "Appartement supprimé"});
             } else {
                 res.status(500).json({error: result});
             }
