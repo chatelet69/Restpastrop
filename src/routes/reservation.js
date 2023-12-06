@@ -4,6 +4,7 @@ const ReservationController = require("../controller/ReservationController");
 const authMiddleware            = require("../middlewares/authMiddleware");
 const authorizationMiddleware   = require("../middlewares/authorizationMiddleware");
 const checkIfAdmin   = require("../middlewares/checkIfAdmin");
+
 const reservationController = new ReservationController();
 
 // GET
