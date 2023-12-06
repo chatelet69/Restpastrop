@@ -13,91 +13,68 @@ class ReservationService {
 
     async bookAppart(data) {
         try {
-            if (moment(data.startDate).isBefore(moment().locale())) {
-                return {
-                    message: 'start date is in the past'
-                }
-            }
-            if (moment(data.endDate).isBefore(moment().locale())) {
-                return {
-                    message: 'end date is in the past'
-                }
-            }
-            if (moment(data.endDate).isBefore(data.startDate)) {
-                return {
-                    message: 'end date is before start date'
-                }
-            }
+            for (const key in data) if (data[key] === undefined) return {error: "data_missing_or_unauthentified"};
             
-            console.log(`data before calling check: ${data.idAppart} ${data.endDate} ${data.startDate}`)
-            const result = await this.checkAvailabilityAppart(data.idAppart, data.endDate,data.startDate)
-            console.log(result)
+            if (moment(data.startDate).isBefore(moment())) return {message: "Date de début est dans le passé"};
+            if (moment(data.endDate).isBefore(moment())) return {message: "Date de fin est dans le passé"};
+            if (moment(data.endDate).isBefore(data.startDate)) return {message: "La date de fin est avant la date de début"};
+            
+            const result = await this.checkAvailabilityAppart(data.appartId, data.endDate, data.startDate);
             if (result.isAvailable) {
-                const res = await this.appartRepository.getAppartById(data.idAppart)
-                if (res==0){
-                    return {
-                        message: "l'appart n'existe pas"
-                        
-                    }
-                    
-                }else{
-                    const booked = this.reservationRepository.saveReservation(data)
-                    return {
-                        message: 'appart booked',
-                        reservationId: res[0].id
+                const res = await this.appartRepository.getAppartById(data.appartId);
+                if (res == 0) {
+                    return {message: "l'appart n'existe pas"};
+                } else {
+                    const booked = await this.reservationRepository.saveReservation(data);
+                    if (booked.affectedRows) {          // Vérifie que l'insert a bien affectée une ligne
+                        return {
+                            message: "appart_booked",
+                            reservationId: booked.insertId      // Renvoie l'id de la ligne insérée
+                        };
+                    } else {
+                        return {error: "error during save reservation"};
                     }
                 }
-                
             } else {
-                console.log(`appartment unavailable`)
-                return {
-                    message: 'appart already booked'
-                }
+                return {message: "appart_already_booked"};
             }
         } catch (error) {
             console.log(error);
+            return {error: "Erreur du service de Réservation"};
         }
     }
 
     async checkAvailabilityAppart(appartId, endDate, startDate){
-        const result = await this.reservationRepository.checkAvailabilityAppart(appartId, endDate, startDate)
-        console.log(result)
+        const result = await this.reservationRepository.checkAvailabilityAppart(appartId, endDate, startDate);
         return {
             isAvailable: (result.length == 0),
             result: result
-        } 
+        };
     }
 
     async saveReservation(data){
-        const result = await reservationRepository.saveReservation(data)
+        await reservationRepository.saveReservation(data);
     }
 
-    async cancelReservation(idUser, idReservation, isAdmin){ 
+    async cancelReservation(userId, idReservation, isAdmin){ 
         const resultReservation = await this.reservationRepository.getReservationById(idReservation)
-        const resultAppartUser = await this.appartRepository.getAppartsByOwner(idUser)
+        const resultAppartUser = await this.appartRepository.getAppartsByOwner(userId)
         const id = resultAppartUser.map(item => item.id);
-        const isIdAppartEqual = id.includes(resultReservation[0].appartId)
+        const isIdAppartEqual = id.includes(resultReservation[0].appartId);
     
-        if(resultReservation.length == 0){
-             return {
-                message : "appart doesn't exist"
-             }
-        }else{
-            if (resultReservation[0].status == 'BOOKED'){
-                if(resultReservation[0].clientId == idUser || isIdAppartEqual || isAdmin == true){
-                    const result = await this.reservationRepository.cancelReservation(idReservation)
-                    return {
-                        message : 'reservation CANCELED'
-                    }
-                }else{
-                    return{
-                        message : 'annulation de la reservation impossible'
-                    }
+        if (resultReservation.length === 0) {
+            return {message : "l'appartement n'existe pas"};
+        } else {
+            if (resultReservation[0].status === "BOOKED") {
+                if (resultReservation[0].clientId == userId || isIdAppartEqual || isAdmin) {
+                    const result = await this.reservationRepository.cancelReservation(idReservation);
+                    if (result.affectedRows) return {message : "Reservation annulée"};
+                    else return {error: "Impossible d'annuler la réservation"};
+                } else {
+                    return {message : 'Annulation de la reservation impossible'};
                 }
-            }else{
-                return {
-                    message : 'reservation already canceled'
-                }
+            } else {
+                return {message : "Réservation déjà annulée"};
             }
         }
     }
