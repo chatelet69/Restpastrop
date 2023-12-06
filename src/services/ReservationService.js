@@ -73,15 +73,7 @@ class ReservationService {
         const result = await reservationRepository.saveReservation(data)
     }
 
-    async cancelReservation(idUser, idReservation, isAdmin){
-        console.log(idUser)
-        console.log(idReservation)
-        //verifier que c'est bien le user qui a créer la reservation
-        //vérifier que la réservation a un status = CANCEL
-        //ou vérifier que l'appart appartient au user qui veut supprimer la reservation 
-
-
-        //ou verifier que c'est un admin 
+    async cancelReservation(idUser, idReservation, isAdmin){ 
         const resultReservation = await this.reservationRepository.getReservationById(idReservation)
         const resultAppartUser = await this.appartRepository.getAppartsByOwner(idUser)
         const id = resultAppartUser.map(item => item.id);
