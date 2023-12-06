@@ -57,6 +57,27 @@ class UserRepository {
             })
         });
     }
+
+    search(dataSearch) {
+        let sqlQuery = "SELECT id,username FROM users WHERE 1 = 1";
+        for (const key in dataSearch) sqlQuery += ` AND ${key} = ?`;
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, Object.values(dataSearch), (error, result) => {
+                if (error) throw (error);
+                resolve(result);
+            })
+        });
+    }
+
+    deleteUserById(userId) {
+        const sqlQuery = "DELETE FROM users WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [userId], (error, result) => {
+                if (error) throw (error);
+                resolve(result);
+            })
+        });
+    }
 }
 
 module.exports = UserRepository;

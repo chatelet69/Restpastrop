@@ -62,15 +62,41 @@ class UserService {
 
     async registerService(registerData) {
         try {
-            let ret = false;
+            let returnVal = false;
             const required = ["username", "password", "email", "name", "lastname"];
             for (let key in required)
                 if (!Object.hasOwn(registerData, required[key])) return false;
             registerData.password = sha512(registerData.password);
             const finalValues = [registerData.username, registerData.password, registerData.name, registerData.lastname, registerData.email];
             const resDb = await this.userRepository.createUser(finalValues);
-            if (resDb.affectedRows) ret = this.generateKey(resDb.insertId, registerData.username, "user");
-            return ret;
+            if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
+            return returnVal;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async search(data) {
+        try {
+            let returnVal = false;
+            const resDb = await this.userRepository.search(data);
+            if (resDb) {
+                returnVal = resDb;
+                for (const user in returnVal) returnVal[user].infos = `${baseUrl}/users/${returnVal[user].id}`;
+            }
+            return returnVal;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async deleteUserById(userId) {
+        try {
+            const resDb = await this.userRepository.deleteUserById(userId);
+            if (resDb.affectedRows) return true;
+            return false;
         } catch (error) {
             console.log(error);
             return false;
