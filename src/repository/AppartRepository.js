@@ -36,7 +36,7 @@ class AppartRepository {
         });
     }
 
-    getOwnerByAppart(appartId){
+    async getOwnerByAppart(appartId){
         return new Promise((resolve, reject) => {
             this.db.query("SELECT owner FROM apparts WHERE id = ?", [appartId], (error, results) => {
                 if (error) reject(error);
@@ -54,9 +54,9 @@ class AppartRepository {
         });
     }
 
-    async delAppart(id){
+    async delAppart(id, idOwner){
         return new Promise ((resolve, reject) => {
-            this.db.query("DELETE FROM apparts WHERE id = ?", [id], (error, results) => {
+            this.db.query("DELETE FROM apparts WHERE id = ? AND owner = ?", [id, idOwner], (error, results) => {
                 if(error) reject(error);
                 resolve(results);
             })

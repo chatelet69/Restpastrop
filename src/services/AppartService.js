@@ -31,10 +31,11 @@ class AppartService {
     async deleteAppart(req, res){
         if (!isNaN(req.params.id)) {
             if (req.params.id>0) {
-                console.log("rank : " + req.user.rank + " id : " + req.user.id);
                 if (req.user.rank === "owner") {
-                    if (getOwnerByAppart(req.params.id) === req.user.id) {
-                        let results = await appartRepo.delAppart(req.params.id);
+                    let idOwner = await appartRepo.getOwnerByAppart(req.params.id);
+                    console.log("rank : " + req.user.rank + ", id : " + req.user.userId + ", owner id : " + idOwner[0]['owner']);
+                    if (idOwner[0]['owner'] === req.user.userId) {
+                        let results = await appartRepo.delAppart(req.params.id, idOwner[0]['owner']);
                         if (!results) {
                             res.status(500).json({error: "Error during delete appartments"});
                         }else{
@@ -44,7 +45,8 @@ class AppartService {
                         return "You are not the owner of this appartment.";
                     }
                 }else if (req.user.rank === "admin") {
-                    let results = await appartRepo.delAppart(req.params.id);
+                    let idOwner = await appartRepo.getOwnerByAppart(req.params.id);
+                        let results = await appartRepo.delAppart(req.params.id, idOwner[0]['owner']);
                         if (!results) {
                             res.status(500).json({error: "Error during delete appartments"});
                         }else{
