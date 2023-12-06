@@ -52,7 +52,7 @@ router.post("/apparts/create", [authMiddleware, authAdminMiddleware], async (req
     await appartControl.postAppart(req, res);
 });
 
-router.delete("/apparts/delete/:id",[authMiddleware], async (req, res) => {
+router.delete("/apparts/:id",[authMiddleware], async (req, res) => {
     await appartControl.deleteAppart(req, res);
 })
 module.exports = router;
