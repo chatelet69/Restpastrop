@@ -57,6 +57,37 @@ class UserController {
             res.status(500).json({error: "Error during register"});
         }
     }
+
+    async search(req, res) {
+        try {
+            const data = req.query;
+            if (Object.keys(data).length) {     // Renvoit un tableau des clés de l'objet, dont on récupère la taille
+                const resData = await userService.search(data);
+                res.status(200).json(resData);
+            } else {
+                res.status(400).json({message: "need a search query", documentation: "https://doc"});
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Error during search"});
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const userIdDelete = req.params.id;
+            const check = await userService.getUserService(userIdDelete);
+            if (check) {
+                userService.deleteUserById(userIdDelete);
+                res.status(200).json({message: "successfuly deleted"});
+            } else {
+                res.status(403).json({message: "error", cause: "user dosn't exist"});
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Error during delete"});
+        }
+    }
 }
 
 module.exports = UserController;
