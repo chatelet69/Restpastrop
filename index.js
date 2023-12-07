@@ -30,5 +30,5 @@ app.listen(port, () => {
 
 // Pour toutes les requêtes sur des routes non définies
 app.use((req, res, next) => {
-    res.status(404).json({error: "ressource not found!"});
+    res.status(404).json({error: "ressource not found!", cause: "bad method or inexistant route", help: "https://doc.com/A_CHANGER"});
 });
