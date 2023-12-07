@@ -120,9 +120,11 @@ class UserService {
                         if(!Object.hasOwn(req.body, authorized[y])){ return "Mauvais paramètres."}else{break;};
                     }                        
                 }
-                    if (req.user.rank === "admin" || req.user.userId === idUser) {
+                    console.log(req.user.userId + " " + idUser);
+                    if (req.user.rank == "admin" || req.user.userId == idUser) {
                         let patchInfos = [];
-                        let z = 0;
+                        patchInfos[0] = idUser;
+                        let z = 1;
                         for(let x = 0; x<authorized.length; x++){ // algo qui met les données dans l'odre pour le repo
                             for(let y = 0; y < bodySize ; y++){
                               if(Object.keys(req.body)[y] === authorized[x]){
@@ -132,13 +134,16 @@ class UserService {
                               }
                             }
                         }
+                        patchInfos[(patchInfos.length)] = idUser;
                         console.log(patchInfos);
-                        const resDb = await this.userRepository.patchUserById(idUser, req.body);
+                        const resDb = await this.userRepository.patchUserById(idUser, req.body, patchInfos);
                         if (resDb.affectedRows) {
-                            return "ok"                    
+                            return "ok";                
                         }else{
-                            return "aucune ligne n'a été modifiée"
+                            return "aucune ligne n'a été modifiée";
                         }
+                }else{
+                    return "Vous n'êtes pas habilité à faire cette action.";
                 }
             }else{
                 return "le body est vide";

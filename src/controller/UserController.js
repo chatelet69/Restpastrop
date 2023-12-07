@@ -1,4 +1,5 @@
 const UserService = require("../services/UserService");
+const baseUrl = require("../../config.json").baseUrl;
 const userService = new UserService();
 
 class UserController {
@@ -96,16 +97,17 @@ class UserController {
             if(check){
                 let result = await userService.patchUserById(userId, req);
                 if (result === "ok") {
-                    res.status(200).json({message: "successfuly patched"});                    
+                    res.status(200).json({message: "Modification réalisée avec succès !", redirection: {lien:`${baseUrl}/users/${req.params.id}`, methode: "GET"}});                    
                 }else{
-                    res.status(403).json({message: "error", cause: result});
+                    console.log(result)
+                    res.status(403).json({message: "Erreur", cause: result});
                 }
             }else{
-                res.status(403).json({message: "error", cause: "user dosn't exist"});
+                res.status(403).json({message: "Erreur", cause: "L'utilisateur n'existe pas"});
             }
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during the patch"});
+            res.status(500).json({error: "Une erreur est survenue durant la modification de l'utilisateur."});
         }
     }
 }
