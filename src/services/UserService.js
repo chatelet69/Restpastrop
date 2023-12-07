@@ -109,6 +109,50 @@ class UserService {
         if (check.affectedRows == 0) return false;
         return token;
     }
+
+    async patchUserById(idUser, req){
+        try {
+            let bodySize = Object.keys(req.body).length;
+            if (bodySize) {
+                let authorized = ["username", "email", "name", "lastname", "password", "rank"];
+                for(let x = 0 ; x < bodySize ; x++){
+                    for (let y = 0; y < authorized.length; y++){
+                        if(!Object.hasOwn(req.body, authorized[y])){ return "Mauvais paramètres."}else{break;};
+                    }                        
+                }
+                    console.log(req.user.userId + " " + idUser);
+                    if (req.user.rank == "admin" || req.user.userId == idUser) {
+                        let patchInfos = [];
+                        patchInfos[0] = idUser;
+                        let z = 1;
+                        for(let x = 0; x<authorized.length; x++){ // algo qui met les données dans l'odre pour le repo
+                            for(let y = 0; y < bodySize ; y++){
+                              if(Object.keys(req.body)[y] === authorized[x]){
+                                patchInfos[z] = Object.values(req.body)[y];
+                                z++;
+                                break;
+                              }
+                            }
+                        }
+                        patchInfos[(patchInfos.length)] = idUser;
+                        console.log(patchInfos);
+                        const resDb = await this.userRepository.patchUserById(idUser, req.body, patchInfos);
+                        if (resDb.affectedRows) {
+                            return "ok";                
+                        }else{
+                            return "aucune ligne n'a été modifiée";
+                        }
+                }else{
+                    return "Vous n'êtes pas habilité à faire cette action.";
+                }
+            }else{
+                return "le body est vide";
+            }
+        } catch (error) {
+            console.log(error);
+            return "Une erreur est survenue durant la modification de l'utilisateur.";
+        }
+    }
 }
 
 module.exports = UserService;
