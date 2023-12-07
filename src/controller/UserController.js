@@ -88,6 +88,26 @@ class UserController {
             res.status(500).json({error: "Error during delete"});
         }
     }
+
+    async patchUser(req, res){
+        try {
+            const userId = req.params.id;
+            const check = await userService.getUserService(userId);
+            if(check){
+                let result = await userService.patchUserById(userId, req);
+                if (result === "ok") {
+                    res.status(200).json({message: "successfuly patched"});                    
+                }else{
+                    res.status(403).json({message: "error", cause: result});
+                }
+            }else{
+                res.status(403).json({message: "error", cause: "user dosn't exist"});
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Error during the patch"});
+        }
+    }
 }
 
 module.exports = UserController;

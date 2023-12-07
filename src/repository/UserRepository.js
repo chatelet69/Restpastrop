@@ -78,6 +78,20 @@ class UserRepository {
             })
         });
     }
+
+    async patchUserById(userId, body){
+        let sqlQuery = "UPDATE apparts SET id = :id";
+        if(body.username) sqlQuery+=", username = :username";
+        if(body.email) sqlQuery+=", email = :email";
+        if(body.name) sqlQuery+=", name = :name";
+        if(body.lastname) sqlQuery+=", lastname = :lastname";
+        if(body.password) sqlQuery+=", password = :password";
+        if(body.rank) sqlQuery+=", rank = :rank";
+        console.log(sqlQuery)
+       /* return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [id : userId, Object.keys(body) : Object.values(body)])
+        })*/
+    }
 }
 
 module.exports = UserRepository;

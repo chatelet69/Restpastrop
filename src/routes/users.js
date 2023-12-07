@@ -34,4 +34,8 @@ router.post("/login", userController.authLogin);
 
 router.delete("/users/:id", [authMiddleware, authAdminMiddleware], userController.deleteUser);
 
+// Patch Method
+
+router.patch("/users/:id", [authMiddleware], userController.patchUser);
+
 module.exports = router;
