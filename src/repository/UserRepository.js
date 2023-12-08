@@ -95,6 +95,26 @@ class UserRepository {
             })
         });
     }
+
+    async getRankById(id){
+        let sqlQuery = "SELECT rank FROM users WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, id, (error, result) => {
+                if (error) reject(error);
+                resolve(result[0]['rank']);
+            })
+        });
+    }
+
+    async changeRankById(rank, id){
+        let sqlQuery = "UPDATE users SET rank = ? WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [rank, id], (error, result) => {
+                if (error) reject(error);
+                resolve(result);
+            })
+        });
+    }
 }
 
 module.exports = UserRepository;
