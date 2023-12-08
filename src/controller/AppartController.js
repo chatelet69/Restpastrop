@@ -28,8 +28,19 @@ class AppartController{
 
     async postAppart(req, res){
         try {
-            const body = req.body;
-            let result = await this.service.createAppart(body, res);
+            const title = req.body.title;
+            const owner = req.body.owner;
+            const address = req.body.address;
+            const status = req.body.status;
+            const price = req.body.price;
+            const area = req.body.area;
+            const nb_rooms = req.body.nb_rooms;
+            const max_people = req.body.max_people;
+
+            const userRank = req.user.rank;
+            const userId = req.user.userId;
+
+            let result = await this.service.createAppart(owner, title, address, status, price, area, nb_rooms, max_people, userRank, userId);
             if (result === "ok") res.status(200).json({message: "success"});
             else res.status(500).json({error: result});
         } catch (error) {
@@ -66,6 +77,18 @@ class AppartController{
             const isAdmin = (req.user.rank === "admin") ? true : false;
             let resEdit = await this.service.editAppart(userId, appartId, data, isAdmin);
             if (resEdit) res.status(200).json({message: resEdit});
+            else res.status(400).json({message: "Error during request"});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: `Error during the patch of the appartment ${req.params.id}`});
+        }
+    }
+    
+    async validAppart(req, res) {
+        try {
+            const appartId = req.params.id;
+            let resValid = await this.service.validAppart(appartId);
+            if (resValid) res.status(200).json({message: resEdit});
             else res.status(400).json({message: "Error during request"});
         } catch (error) {
             console.log(error);

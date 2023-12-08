@@ -1,12 +1,16 @@
 const Appart            = require("../model/Appart");
 const AppartRepository  = require("../repository/AppartRepository");
 const baseUrl           = require("../../config.json").baseUrl;
+const UserRepository    = require("../repository/UserRepository");
+
 
 class AppartService {
     repository;
+    userRepo;
 
     constructor(){
         this.repository = new AppartRepository();
+        this.userRepo = new UserRepository();
     }
 
     async getAllApparts() {
@@ -31,14 +35,24 @@ class AppartService {
         }
     }
 
-    async createAppart(req, res) {
-        if (typeof req.title === 'string' && typeof req.address === 'string') {
-            if (!isNaN(req.owner) && !isNaN(req.status) && !isNaN(req.price) && !isNaN(req.area) && !isNaN(req.nb_rooms) && !isNaN(req.max_people)) {
-                if (req.owner>0) {
-                    let results = await appartRepo.createAppart(req);
+    async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people, userRank, userId) {
+        
+        if (typeof title === 'string' && typeof address === 'string') {
+            if(userRank === "admin"){
+                status = "dispo";
+                if(!idOwner) idOwner = userId;
+            }else{
+                status = "en attente"
+                if(idOwner != userId) return "Vous ne pouvez pas créer un appartement au nom d'un autre.";
+            }
+            if (!isNaN(idOwner) && !isNaN(price) && !isNaN(area) && !isNaN(nb_rooms) && !isNaN(max_people)) {
+                
+                if (idOwner>0) {
+                    let results = await this.repository.createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people);
                     if (!results) {
-                        res.status(500).json({error: "Error during creating appartments"});
+                        return "Error during creating appartments";
                     }else{
+                        if(idOwner != userId && await this.userRepo.getRankById(idOwner) == "user") await this.userRepo.changeRankById("owner", idOwner); 
                         return "ok";
                     }
                 }else{
@@ -98,6 +112,29 @@ class AppartService {
         } catch (error) {
             console.log(error);
             return false;
+        }
+    }
+    
+    async validAppart(appartId){
+        if (appartId) {
+            if (this.repository.getStatusByAppart(appartId) == "en attente") {
+                const object = Object.create();
+                object.status="dispo";
+                const resDb = await this.repository.editAppart(appartId, object);
+                if (resDb.affectedRows>0) {
+                    const idOwner = await this.repository.getOwnerByAppart(appartId);
+                    const object = Object.create();
+                    object.rank="owner";
+                    const resOwner = await this.userRepo.patchUserById(appartId)
+                    if (resOwner.affectedRows>0) {
+                        return "Logement validé !";
+                    }
+                }
+            }else{
+                return "Logement déjà validé";
+            }
+        }else{
+            return "Merci de préciser l'id.";
         }
     }
 }
