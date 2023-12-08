@@ -40,15 +40,21 @@ class AppartController{
     
     async deleteAppart(req, res){
         try {
-            let result = await this.service.deleteAppart(req, res);
-            if (result === "ok") {
-                res.status(200).json({message: "Appartement supprimé"});
-            } else {
-                res.status(500).json({error: result});
+            const appartId = req.params.id;
+            const check = await this.service.getAppartById(appartId);
+            if (check) {
+                let result = await this.service.deleteAppart(req, res);
+                if (result === "ok") {
+                    res.status(200).json({message: "Appartement supprimé"});
+                } else {
+                    res.status(403).json({error: result});
+                }
+            }else{
+                res.status(403).json({error: "Cet appartement n'existe pas."});
             }
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Error during the delete of the appartment ${req.params.id}`});
+            res.status(500).json({error: `Une erreur est survenue lors de la suppressio de l'appartement ${req.params.id}`});
         }
     }
 

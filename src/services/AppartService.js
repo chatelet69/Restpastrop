@@ -56,10 +56,9 @@ class AppartService {
         if (!isNaN(req.params.id)) {
             if (req.params.id>0) {
                 if (req.user.rank === "owner") {
-                    let idOwner = await appartRepo.getOwnerByAppart(req.params.id);
-                    console.log("rank : " + req.user.rank + ", id : " + req.user.userId + ", owner id : " + idOwner[0]['owner']);
+                    let idOwner = await this.repository.getOwnerByAppart(req.params.id);
                     if (idOwner[0]['owner'] === req.user.userId) {
-                        let results = await appartRepo.delAppart(req.params.id, idOwner[0]['owner']);
+                        let results = await this.repository.delAppart(req.params.id, idOwner[0]['owner']);
                         if (!results) {
                             res.status(500).json({error: "Error during delete appartments"});
                         }else{
@@ -69,8 +68,8 @@ class AppartService {
                         return "You are not the owner of this appartment.";
                     }
                 }else if (req.user.rank === "admin") {
-                    let idOwner = await appartRepo.getOwnerByAppart(req.params.id);
-                        let results = await appartRepo.delAppart(req.params.id, idOwner[0]['owner']);
+                    let idOwner = await this.repository.getOwnerByAppart(req.params.id);
+                        let results = await this.repository.delAppart(req.params.id, idOwner[0]['owner']);
                         if (!results) {
                             res.status(500).json({error: "Error during delete appartments"});
                         }else{
