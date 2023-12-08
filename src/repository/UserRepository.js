@@ -78,15 +78,14 @@ class UserRepository {
             })
         });
     }
-
-    async patchUserById(userId, body, values){
+    async patchUserById(userId, req, values){
         let sqlQuery = "UPDATE users SET id = ?";
-        if(body.username) sqlQuery+=", username = ?";
-        if(body.email) sqlQuery+=", email = ?";
-        if(body.name) sqlQuery+=", name = ?";
-        if(body.lastname) sqlQuery+=", lastname = ?";
-        if(body.password) sqlQuery+=", password = ?";
-        if(body.rank) sqlQuery+=", rank = ?";
+        if(req.body.username) sqlQuery+=", username = ?";
+        if(req.body.email) sqlQuery+=", email = ?";
+        if(req.body.name) sqlQuery+=", name = ?";
+        if(req.body.lastname) sqlQuery+=", lastname = ?";
+        if(req.body.password) sqlQuery+=", password = ?";
+        if(req.body.rank && req.user.userId === "admin") sqlQuery+=", rank = ?";
         
         sqlQuery+=" WHERE id = ?";
         return new Promise((resolve, reject) => {

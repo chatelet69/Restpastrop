@@ -122,6 +122,10 @@ class UserService {
                 }
                     console.log(req.user.userId + " " + idUser);
                     if (req.user.rank == "admin" || req.user.userId == idUser) {
+                        if(req.body.password){
+                            req.body.password = sha512(req.body.password);
+                            console.log(req.body.password);
+                        }
                         let patchInfos = [];
                         patchInfos[0] = idUser;
                         let z = 1;
@@ -135,8 +139,7 @@ class UserService {
                             }
                         }
                         patchInfos[(patchInfos.length)] = idUser;
-                        console.log(patchInfos);
-                        const resDb = await this.userRepository.patchUserById(idUser, req.body, patchInfos);
+                        const resDb = await this.userRepository.patchUserById(idUser, req, patchInfos);
                         if (resDb.affectedRows) {
                             return "ok";                
                         }else{
