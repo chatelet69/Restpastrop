@@ -78,7 +78,6 @@ class UserRepository {
             })
         });
     }
-
     async patchUserById(userId, req, values){
         let sqlQuery = "UPDATE users SET id = ?";
         if(req.body.username) sqlQuery+=", username = ?";

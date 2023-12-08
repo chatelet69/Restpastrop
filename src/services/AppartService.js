@@ -1,14 +1,37 @@
-const Appart = require("../model/Appart");
-const AppartRepository = require("../repository/AppartRepository");
-const appartRepo = new AppartRepository();
-
+const Appart            = require("../model/Appart");
+const AppartRepository  = require("../repository/AppartRepository");
+const baseUrl           = require("../../config.json").baseUrl;
 
 class AppartService {
+    repository;
+
     constructor(){
-        this.repository= new AppartRepository;
+        this.repository = new AppartRepository();
     }
 
-    async createAppart(req, res){
+    async getAllApparts() {
+        try {
+            let apparts = await this.repository.getAllApparts();
+            for (const appart in apparts) apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
+            return apparts;
+        } catch (error) {
+            console.log("Error at AppartService : ", error);
+            return "error";
+        }
+    }
+
+    async getAppartById(appartId) {
+        try {
+            let appart = await this.repository.getAppartById(appartId);
+            if (Object.keys(appart).length) appart.specs = `${baseUrl}/apparts/${appart.id}/specs`;
+            return appart;
+        } catch (error) {
+            console.log("Error at AppartService : ", error);
+            return false;
+        }
+    }
+
+    async createAppart(req, res) {
         if (typeof req.title === 'string' && typeof req.address === 'string') {
             if (!isNaN(req.owner) && !isNaN(req.status) && !isNaN(req.price) && !isNaN(req.area) && !isNaN(req.nb_rooms) && !isNaN(req.max_people)) {
                 if (req.owner>0) {
@@ -28,7 +51,8 @@ class AppartService {
             return "Error during creating appartments, string variables are actually numbers";
         }
     }
-    async deleteAppart(req, res){
+
+    async deleteAppart(req, res) {
         if (!isNaN(req.params.id)) {
             if (req.params.id>0) {
                 if (req.user.rank === "owner") {
@@ -60,6 +84,21 @@ class AppartService {
             }
         }else{
             return "ID is not a number";
+        }
+    }
+
+    async editAppart(userId, appartId, newData, isAdmin) {
+        try {
+            const appart = await this.repository.getAppartById(appartId);
+            if (appart !== undefined && Object.keys(appart).length) {
+                if (appart.owner != userId && !isAdmin) return "Permission refusée";
+                const resDb = await this.repository.editAppart(appartId, newData);
+                if (resDb.affectedRows > 0) return "Appartement édité";
+            }
+            return "Appartement inexistant";
+        } catch (error) {
+            console.log(error);
+            return false;
         }
     }
 }

@@ -9,8 +9,8 @@ class ReservationRepository {
     }
 
     checkAvailabilityAppart(appartId, endDate, startDate){
-        const formattedStartDate = moment(startDate).format('YYYY-MM-DD HH:mm:ss');
-        const formattedEndDate = moment(endDate).format('YYYY-MM-DD HH:mm:ss');
+        const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
+        const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
         return new Promise((resolve, reject) => {
             this.db.query(`select id from reservation where appartId = ? and ((startDate <= ? and endDate > ?) or (startDate > ? and startDate <= ?) or (endDate > ? and endDate <= ?))`, 
 [appartId, formattedStartDate, formattedEndDate, formattedStartDate, formattedEndDate, formattedStartDate, formattedEndDate], (error, results) => {
@@ -21,16 +21,37 @@ class ReservationRepository {
     }
     
     async saveReservation(data){
-        const sql = "INSERT INTO reservation (clientId, appartId, startDate, endDate, status) VALUES (?, ?, ?, ?, ?)";
-        const formattedStartDate = moment(data.startDate).format('YYYY-MM-DD HH:mm:ss');
-        const formattedEndDate = moment(data.endDate).format('YYYY-MM-DD HH:mm:ss');
+        const sql = "INSERT INTO reservation (clientId, appartId, startDate, endDate, status) VALUES (?, ?, ?, ?, 'BOOKED')";
+        //const formattedStartDate = moment(data.startDate).format('YYYY-MM-DD');
+        //const formattedEndDate = moment(data.endDate).format('YYYY-MM-DD');
         return new Promise((resolve, reject) => {
-            this.db.query(sql, [data.clientId, data.idAppart, formattedStartDate, formattedEndDate, data.status], (error, results) => {
+            this.db.query(sql, [data.clientId, data.appartId, data.startDate, data.endDate], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
             });
         });
        ;
+    }
+
+    async cancelReservation(idReservation){
+        const sql = "UPDATE reservation set status = 'CANCELED' WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sql, [idReservation], (error, result) => {
+                if (error) reject(error);
+                resolve(result);
+            });
+        });
+       ;
+    }
+
+    async getReservationById(idReservation){
+        const sql = "select * FROM reservation WHERE ID = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sql, [idReservation], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
     }
 }
 
