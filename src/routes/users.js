@@ -6,6 +6,7 @@ const authorizationMiddleware   = require("../middlewares/authorizationMiddlewar
 const authAdminMiddleware       = require("../middlewares/authAdminMiddleware");
 const cacheMiddleware           = require("../middlewares/cacheMiddleware");
 const getMethodCheck            = require("../middlewares/getMethodCheck");
+const checkIfAdmin              = require("../middlewares/checkIfAdmin");
 const userController            = new UserController();
 
 // Get method
@@ -36,6 +37,6 @@ router.delete("/users/:id", [authMiddleware, authAdminMiddleware], userControlle
 
 // Patch Method
 
-router.patch("/users/:id", [authMiddleware], userController.patchUser);
+router.patch("/users/:id", [authMiddleware, checkIfAdmin], userController.patchUser);
 
 module.exports = router;

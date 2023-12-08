@@ -110,46 +110,24 @@ class UserService {
         return token;
     }
 
-    async patchUserById(idUser, req){
+    async patchUserById(userId, data){
         try {
-            let bodySize = Object.keys(req.body).length;
+            let bodySize = Object.keys(data.body).length;
             if (bodySize) {
                 let authorized = ["username", "email", "name", "lastname", "password", "rank"];
-                for(let x = 0 ; x < bodySize ; x++){
-                    for (let y = 0; y < authorized.length; y++){
-                        if(!Object.hasOwn(req.body, authorized[y])){ return "Mauvais paramètres."}else{break;};
-                    }                        
-                }
-                    console.log(req.user.userId + " " + idUser);
-                    if (req.user.rank == "admin" || req.user.userId == idUser) {
-                        if(req.body.password){
-                            req.body.password = sha512(req.body.password);
-                            console.log(req.body.password);
-                        }
-                        let patchInfos = [];
-                        patchInfos[0] = idUser;
-                        let z = 1;
-                        for(let x = 0; x<authorized.length; x++){ // algo qui met les données dans l'odre pour le repo
-                            for(let y = 0; y < bodySize ; y++){
-                              if(Object.keys(req.body)[y] === authorized[x]){
-                                patchInfos[z] = Object.values(req.body)[y];
-                                z++;
-                                break;
-                              }
-                            }
-                        }
-                        patchInfos[(patchInfos.length)] = idUser;
-                        const resDb = await this.userRepository.patchUserById(idUser, req, patchInfos);
-                        if (resDb.affectedRows) {
-                            return "ok";                
-                        }else{
-                            return "aucune ligne n'a été modifiée";
-                        }
-                }else{
+                for (const key in data.body)
+                    if (!authorized.includes(key)) return "Données éronnées";
+
+                if (data.azisAdmin || data.userId == userId) {
+                    if (data.body.password) data.body.password = sha512(data.body.password);
+                    const resDb = await this.userRepository.patchUserById(userId, data.body);
+                    return (resDb.affectedRows) ? 
+                    {link:`${baseUrl}/users/${data.userId}`, method: "GET"} : "Modification impossible";
+                } else {
                     return "Vous n'êtes pas habilité à faire cette action.";
                 }
-            }else{
-                return "le body est vide";
+            } else {
+                return "le corps de données est vide";
             }
         } catch (error) {
             console.log(error);

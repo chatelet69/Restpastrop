@@ -92,18 +92,18 @@ class UserController {
 
     async patchUser(req, res){
         try {
-            const userId = req.params.id;
-            const check = await userService.getUserService(userId);
-            if(check){
-                let result = await userService.patchUserById(userId, req);
-                if (result === "ok") {
-                    res.status(200).json({message: "Modification réalisée avec succès !", redirection: {lien:`${baseUrl}/users/${req.params.id}`, methode: "GET"}});                    
-                }else{
-                    console.log(result)
-                    res.status(403).json({message: "Erreur", cause: result});
-                }
-            }else{
-                res.status(403).json({message: "Erreur", cause: "L'utilisateur n'existe pas"});
+            const data = {
+                userId: req.params.id,
+                body: req.body,
+                isAdmin: req.user.isAdmin
+            }
+            const check = await userService.getUserService(data.userId);
+            if (check) {
+                let result = await userService.patchUserById(data.userId, data);
+                if (result.link) res.status(200).json({message: "Modification réalisée avec succès !", redirect: result});
+                else res.status(403).json({message: "Erreur", cause: result});
+            } else {
+                res.status(404).json({error: "L'utilisateur n'existe pas"});
             }
         } catch (error) {
             console.log(error);
