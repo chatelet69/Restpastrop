@@ -84,7 +84,7 @@ class UserRepository {
         sqlQuery+=" WHERE id = ?";
         data.userId = userId;
         return new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, Object.values(data), (error, result) => {
+            let test = this.db.query(sqlQuery, Object.values(data), (error, result) => {
                 if (error) reject(error);
                 resolve(result);
             })

@@ -88,7 +88,7 @@ class AppartController{
         try {
             const appartId = req.params.id;
             let resValid = await this.service.validAppart(appartId);
-            if (resValid) res.status(200).json({message: resEdit});
+            if (resValid) res.status(200).json({message: resValid});
             else res.status(400).json({message: "Error during request"});
         } catch (error) {
             console.log(error);

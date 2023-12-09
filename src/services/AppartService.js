@@ -38,9 +38,9 @@ class AppartService {
     async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people, userRank, userId) {
         
         if (typeof title === 'string' && typeof address === 'string') {
+            if(!idOwner) idOwner = userId;
             if(userRank === "admin"){
                 status = "dispo";
-                if(!idOwner) idOwner = userId;
             }else{
                 status = "en attente"
                 if(idOwner != userId) return "Vous ne pouvez pas créer un appartement au nom d'un autre.";
@@ -117,18 +117,23 @@ class AppartService {
     
     async validAppart(appartId){
         if (appartId) {
-            if (this.repository.getStatusByAppart(appartId) == "en attente") {
-                const object = Object.create();
-                object.status="dispo";
+            const stat = await this.repository.getStatusByAppart(appartId);
+            if (stat[0]['status'] == "en attente") {
+                let object = [];
+                object['status']= "dispo";
                 const resDb = await this.repository.editAppart(appartId, object);
                 if (resDb.affectedRows>0) {
                     const idOwner = await this.repository.getOwnerByAppart(appartId);
-                    const object = Object.create();
-                    object.rank="owner";
-                    const resOwner = await this.userRepo.patchUserById(appartId)
+                    console.log(idOwner);
+                    let newRank = "owner";
+                    const resOwner = await this.userRepo.changeRankById(newRank, idOwner[0]['owner'])
                     if (resOwner.affectedRows>0) {
                         return "Logement validé !";
+                    }else{
+                        return "Erreur, le rôle du propriétaire n'a pas été modifié";
                     }
+                }else{
+                    return "Aucun appartement n'a été validé";
                 }
             }else{
                 return "Logement déjà validé";
