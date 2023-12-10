@@ -5,6 +5,7 @@ const AppartController          = require("../controller/AppartController");
 const authMiddleware            = require("../middlewares/authMiddleware");
 const authorizationMiddleware   = require("../middlewares/authorizationMiddleware");
 const authAdminMiddleware       = require("../middlewares/authAdminMiddleware");
+const checkIfAdmin              = require("../middlewares/checkIfAdmin");
 const appartControl             = new AppartController();
 
 // Get method
@@ -39,6 +40,14 @@ router.patch("/apparts/validate/:id", [authMiddleware, authAdminMiddleware], (re
 
 router.get("/apparts/search/by", [authMiddleware, authorizationMiddleware], (req, res) => {
     appartControl.searchAppartBy(req, res);
+})
+
+router.get("/apparts/spec/:id", [authMiddleware, authorizationMiddleware], (req, res) => {
+    appartControl.getSpecByAppart(req, res);
+})
+
+router.patch("/apparts/spec/:id", [authMiddleware, authorizationMiddleware, checkIfAdmin], (req, res) => {
+    appartControl.patchSpecByAppart(req, res);
 })
 
 module.exports = router;

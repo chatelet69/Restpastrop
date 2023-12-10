@@ -1,5 +1,6 @@
+const mysql = require("mysql2");
 const DatabaseConnection = require("./Database");
-const appartModel= require("../model/Appart");
+const appartModel = require("../model/Appart");
 
 class AppartRepository {
     db;
@@ -21,7 +22,7 @@ class AppartRepository {
         return new Promise((resolve, reject) => {
             this.db.query("SELECT * FROM apparts WHERE id = ?", [id], (error, result) => {
                 if (error) reject(error);
-                resolve(result[0]);
+                resolve(result);
             });
         });
     }
@@ -68,7 +69,7 @@ class AppartRepository {
         sqlQuery+= "WHERE id = ?";
         return new Promise ((resolve, reject) => {
             this.db.query(sqlQuery, [Object.values(data), appartId], (error, results) => {
-                if(error) reject(error);
+if(error) reject(error);
                 resolve(results);
             })
         })
@@ -89,6 +90,36 @@ class AppartRepository {
         console.log(sqlQuery);
         return new Promise((resolve, reject) => {
             this.db.query(sqlQuery, [Object.values(query)], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
+
+    async getSpecByAppart(appartId){
+        const sql = "select * from specApparts where idAppart = ?";
+        return new Promise ((resolve, reject) => {
+            this.db.query(sql, [appartId], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
+
+    async patchSpecByAppart(appartId, data){
+        const keys = Object.keys(data);
+        let sqlQuery = "UPDATE specApparts set "
+        console.log(keys);
+        for(let i = 0;  i < keys.length; i++){
+            sqlQuery+= keys[i] + "=?";
+            if (i != keys.length-1){
+                sqlQuery+= ", "
+            }
+        }
+        sqlQuery+= " WHERE idAppart = ?"
+        console.log(sqlQuery);
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [...Object.values(data), appartId], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
             });

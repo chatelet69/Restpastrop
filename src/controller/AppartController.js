@@ -114,6 +114,32 @@ class AppartController{
             res.status(500).json({error: "Erreur durant la recherche d'un appartement."});
         }
     }
+
+    async getSpecByAppart(req, res){
+        try {
+            const appartId = req.params.id;
+            let data = await this.service.getSpecByAppart(appartId);
+            res.status(200).json(data);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: `Erreur durant la récupération des spécificités`});
+        }
+    }
+
+    async patchSpecByAppart(req, res){
+        try {
+            const data = req.body;
+            const appartId = req.params.id;
+            const isAdmin = req.user.isAdmin
+            const userId = req.user.userId
+            console.log(data)
+            let result = await this.service.patchSpecByAppart(appartId, data, isAdmin, userId );
+            res.status(200).json(result);
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: `Erreur durant la modification des spécificités`});
+        }
+    }
 }
 
 module.exports = AppartController;
