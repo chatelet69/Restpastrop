@@ -88,11 +88,30 @@ class AppartController{
         try {
             const appartId = req.params.id;
             let resValid = await this.service.validAppart(appartId);
-            if (resValid) res.status(200).json({message: resValid});
-            else res.status(400).json({message: "Error during request"});
+            if (resValid == "ok") res.status(200).json({message: "Logement validé !"});
+            else res.status(400).json({message: "resValid"});
         } catch (error) {
             console.log(error);
             res.status(500).json({error: `Error during the patch of the appartment ${req.params.id}`});
+        }
+    }
+
+    async searchAppartBy(req, res){
+        try {
+            let query = req.query;
+            if (Object.keys(query).length) {
+                let apparts = await this.service.searchAppartBy(query);
+                if (apparts) {
+                    res.status(200).json(apparts);
+                }else{
+                    res.status(400).json({message: "Erreur durant la récupération des logements"})
+                }
+            }else{
+                res.status(400).json({message: "Paramètres manquants"});
+            }
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Erreur durant la recherche d'un appartement."});
         }
     }
 }

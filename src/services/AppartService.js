@@ -128,7 +128,7 @@ class AppartService {
                     let newRank = "owner";
                     const resOwner = await this.userRepo.changeRankById(newRank, idOwner[0]['owner'])
                     if (resOwner.affectedRows>0) {
-                        return "Logement validé !";
+                        return "";
                     }else{
                         return "Erreur, le rôle du propriétaire n'a pas été modifié";
                     }
@@ -140,6 +140,27 @@ class AppartService {
             }
         }else{
             return "Merci de préciser l'id.";
+        }
+    }
+
+    async searchAppartBy(query){
+        try {
+            let authorized = ["id","owner","title","address","status","price","area","nb_rooms","max_people"];
+            for(let key in query)
+                if(!authorized.includes(key)) return "Erreur, mauvais paramètres";
+
+            let resRepo = await this.repository.searchAppartBy(query);
+            if (resRepo) {
+                for(const appart in resRepo){
+                    resRepo[appart].infos = `${baseUrl}/apparts/${resRepo[appart].id}`;
+                }
+                return resRepo;
+            }else{
+                return false;
+            }
+        } catch (error) {
+            console.log(error);
+            return false;
         }
     }
 }
