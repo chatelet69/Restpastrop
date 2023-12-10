@@ -1,9 +1,11 @@
-const User              = require("../model/User");
-const UserRepository    = require("../repository/UserRepository");
-const sha512            = require('js-sha512');
-const jwt               = require("jsonwebtoken");
-const secret            = require("../../config.json").secretJwt;
-const baseUrl           = require("../../config.json").baseUrl;
+const User                  = require("../model/User");
+const UserRepository        = require("../repository/UserRepository");
+const sha512                = require('js-sha512');
+const jwt                   = require("jsonwebtoken");
+const secret                = require("../../config.json").secretJwt;
+const baseUrl               = require("../../config.json").baseUrl;
+const authorizedKeysUser    = require("../utils/form.json").authorizedKeysUser;
+const requiredRegisterKeys  = require("../utils/form.json").requiredRegisterKeys;
 
 class UserService {
     userRepository;
@@ -63,14 +65,29 @@ class UserService {
     async registerService(registerData) {
         try {
             let returnVal = false;
-            const required = ["username", "password", "email", "name", "lastname"];
-            for (let key in required)
-                if (!Object.hasOwn(registerData, required[key])) return false;
-            registerData.password = sha512(registerData.password);
-            const finalValues = [registerData.username, registerData.password, registerData.name, registerData.lastname, registerData.email];
-            const resDb = await this.userRepository.createUser(finalValues);
-            if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
+            if (this.checkKeysInData(registerData, requiredRegisterKeys, requiredRegisterKeys)) {
+                registerData.password = sha512(registerData.password);
+                const resDb = await this.userRepository.createUser(registerData);
+                if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
+            }
             return returnVal;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async createUser(userData) {
+        try {
+            const required = ["username", "password"];
+            if (this.checkKeysInData(userData, required, authorizedKeysUser)) {
+                userData.password = sha512(userData.password);
+                const resDb = await this.userRepository.createUser(userData);
+                if (resDb.affectedRows) return {message: "Utilisateur créée"};
+                else return false;
+            } else {
+                return {error: "Données manquantes ou erronées"};
+            }
         } catch (error) {
             console.log(error);
             return false;
@@ -110,48 +127,37 @@ class UserService {
         return token;
     }
 
-    async patchUserById(idUser, req){
+    async patchUserById(userId, data){
         try {
-            let bodySize = Object.keys(req.body).length;
+            let bodySize = Object.keys(data.body).length;
             if (bodySize) {
                 let authorized = ["username", "email", "name", "lastname", "password", "rank"];
-                for(let x = 0 ; x < bodySize ; x++){
-                    for (let y = 0; y < authorized.length; y++){
-                        if(!Object.hasOwn(req.body, authorized[y])){ return "Mauvais paramètres."}else{break;};
-                    }                        
-                }
-                    console.log(req.user.userId + " " + idUser);
-                    if (req.user.rank == "admin" || req.user.userId == idUser) {
-                        let patchInfos = [];
-                        patchInfos[0] = idUser;
-                        let z = 1;
-                        for(let x = 0; x<authorized.length; x++){ // algo qui met les données dans l'odre pour le repo
-                            for(let y = 0; y < bodySize ; y++){
-                              if(Object.keys(req.body)[y] === authorized[x]){
-                                patchInfos[z] = Object.values(req.body)[y];
-                                z++;
-                                break;
-                              }
-                            }
-                        }
-                        patchInfos[(patchInfos.length)] = idUser;
-                        console.log(patchInfos);
-                        const resDb = await this.userRepository.patchUserById(idUser, req.body, patchInfos);
-                        if (resDb.affectedRows) {
-                            return "ok";                
-                        }else{
-                            return "aucune ligne n'a été modifiée";
-                        }
-                }else{
+                for (const key in data.body)
+                    if (!authorized.includes(key)) return "Données éronnées";
+
+                if (data.azisAdmin || data.userId == userId) {
+                    if (data.body.password) data.body.password = sha512(data.body.password);
+                    const resDb = await this.userRepository.patchUserById(userId, data.body);
+                    return (resDb.affectedRows) ? 
+                    {link:`${baseUrl}/users/${data.userId}`, method: "GET"} : "Modification impossible";
+                } else {
                     return "Vous n'êtes pas habilité à faire cette action.";
                 }
-            }else{
-                return "le body est vide";
+            } else {
+                return "le corps de données est vide";
             }
         } catch (error) {
             console.log(error);
             return "Une erreur est survenue durant la modification de l'utilisateur.";
         }
+    }
+
+    checkKeysInData(data, required, authorized) {
+        for (let key in required)
+            if (!Object.hasOwn(data, required[key])) return false;
+        for (let key in data)
+            if (!authorized.includes(key)) return false;
+        return true;
     }
 }
 

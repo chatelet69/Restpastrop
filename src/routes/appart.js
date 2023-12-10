@@ -19,7 +19,7 @@ router.get("/apparts/:id", (req, res) => {
 
 // Post method
 
-router.post("/apparts/create", [authMiddleware, authAdminMiddleware], async (req, res) =>{
+router.post("/apparts/create", [authMiddleware], async (req, res) =>{
     await appartControl.postAppart(req, res);
 });
 
@@ -32,5 +32,13 @@ router.delete("/apparts/:id",[authMiddleware], async (req, res) => {
 router.patch("/apparts/:id", [authMiddleware], (req, res) => {
     appartControl.editAppart(req, res);
 });
+
+router.patch("/apparts/validate/:id", [authMiddleware, authAdminMiddleware], (req, res) => {
+    appartControl.validAppart(req, res);
+});
+
+router.get("/apparts/search/by", [authMiddleware, authorizationMiddleware], (req, res) => {
+    appartControl.searchAppartBy(req, res);
+})
 
 module.exports = router;

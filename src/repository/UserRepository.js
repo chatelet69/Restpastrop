@@ -1,4 +1,5 @@
-const DatabaseConnection = require("./Database");
+const DatabaseConnection    = require("./Database");
+const userKeys              = require("../utils/form.json").usersKeysDb;
 
 class UserRepository {
     db;
@@ -49,9 +50,10 @@ class UserRepository {
     }
 
     createUser(userData) {
-        const sqlQuery = "INSERT INTO users (username, password, name, lastname, email, rank) VALUES (?,?,?,?,?, 'user')";
+        const sqlQuery = `INSERT INTO users (${userKeys}) VALUES (?,?,?,?,?,?)`;
+        for (const key in userKeys) if (userData[userKeys[key]] === undefined) userData[userKeys[key]] = "null";
         return new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, userData, (error, result) => {
+            this.db.execute(sqlQuery, Object.values(userData), (error, result) => {
                 if (error) throw (error);
                 resolve(result);
             })
@@ -62,7 +64,7 @@ class UserRepository {
         let sqlQuery = "SELECT id,username FROM users WHERE 1 = 1";
         for (const key in dataSearch) sqlQuery += ` AND ${key} = ?`;
         return new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, Object.values(dataSearch), (error, result) => {
+            this.db.execute(sqlQuery, Object.values(dataSearch), (error, result) => {
                 if (error) throw (error);
                 resolve(result);
             })
@@ -79,18 +81,33 @@ class UserRepository {
         });
     }
 
-    async patchUserById(userId, body, values){
-        let sqlQuery = "UPDATE users SET id = ?";
-        if(body.username) sqlQuery+=", username = ?";
-        if(body.email) sqlQuery+=", email = ?";
-        if(body.name) sqlQuery+=", name = ?";
-        if(body.lastname) sqlQuery+=", lastname = ?";
-        if(body.password) sqlQuery+=", password = ?";
-        if(body.rank) sqlQuery+=", rank = ?";
-        
+    async patchUserById(userId, data){
+        let sqlQuery = "UPDATE users SET id = id";
+        for (const key in data) sqlQuery += `, ${key} = ?`;
         sqlQuery+=" WHERE id = ?";
+        data.userId = userId;
         return new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, values, (error, result) => {
+            let test = this.db.query(sqlQuery, Object.values(data), (error, result) => {
+                if (error) reject(error);
+                resolve(result);
+            })
+        });
+    }
+
+    async getRankById(id){
+        let sqlQuery = "SELECT rank FROM users WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, id, (error, result) => {
+                if (error) reject(error);
+                resolve(result[0]['rank']);
+            })
+        });
+    }
+
+    async changeRankById(rank, id){
+        let sqlQuery = "UPDATE users SET rank = ? WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [rank, id], (error, result) => {
                 if (error) reject(error);
                 resolve(result);
             })

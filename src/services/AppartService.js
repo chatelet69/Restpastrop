@@ -1,21 +1,29 @@
 const Appart            = require("../model/Appart");
 const AppartRepository  = require("../repository/AppartRepository");
 const baseUrl           = require("../../config.json").baseUrl;
+const UserRepository    = require("../repository/UserRepository");
+
 
 class AppartService {
     repository;
+    userRepo;
 
     constructor(){
         this.repository = new AppartRepository();
+        this.userRepo = new UserRepository();
     }
 
     async getAllApparts() {
         try {
             let apparts = await this.repository.getAllApparts();
-            for (const appart in apparts) apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
+            for (const appart in apparts){
+                apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
+                apparts[appart].lien = `${baseUrl}/apparts/${apparts[appart].id}`;
+
+            }
             return apparts;
         } catch (error) {
-            console.log("Error at AppartService : ", error);
+            console.log("Une erreur est survenue lors de la recupération des logements : ", error);
             return "error";
         }
     }
@@ -26,29 +34,39 @@ class AppartService {
             if (Object.keys(appart).length) appart.specs = `${baseUrl}/apparts/${appart.id}/specs`;
             return appart;
         } catch (error) {
-            console.log("Error at AppartService : ", error);
+            console.log("Une erreur est survenue lors de la recupération du logement : ", error);
             return false;
         }
     }
 
-    async createAppart(req, res) {
-        if (typeof req.title === 'string' && typeof req.address === 'string') {
-            if (!isNaN(req.owner) && !isNaN(req.status) && !isNaN(req.price) && !isNaN(req.area) && !isNaN(req.nb_rooms) && !isNaN(req.max_people)) {
-                if (req.owner>0) {
-                    let results = await appartRepo.createAppart(req);
+    async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people, userRank, userId) {
+        
+        if (typeof title === 'string' && typeof address === 'string') {
+            if(!idOwner) idOwner = userId;
+            if(userRank === "admin"){
+                status = "dispo";
+            }else{
+                status = "en attente"
+                if(idOwner != userId) return "Vous ne pouvez pas créer un appartement au nom d'un autre.";
+            }
+            if (!isNaN(idOwner) && !isNaN(price) && !isNaN(area) && !isNaN(nb_rooms) && !isNaN(max_people)) {
+                
+                if (idOwner>0) {
+                    let results = await this.repository.createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people);
                     if (!results) {
-                        res.status(500).json({error: "Error during creating appartments"});
+                        return "Une erreur est survenue lors de la création de l'appartement";
                     }else{
-                        return "ok";
+                        if(idOwner != userId && await this.userRepo.getRankById(idOwner) == "user") await this.userRepo.changeRankById("owner", idOwner); 
+                        return results;
                     }
                 }else{
-                    return "Invalid id for the owner";
+                    return "Id invalide";
                 }
             }else{
-                return "Error during creating appartments, number variables are actually strings";
+                return "Une erreur est survenue lors de la création de l'appartement, certaines variables ont un mauvais type";
             }
         }else{
-            return "Error during creating appartments, string variables are actually numbers";
+            return "Une erreur est survenue lors de la création de l'appartement, certaines variables ont un mauvais type";
         }
     }
 
@@ -56,34 +74,33 @@ class AppartService {
         if (!isNaN(req.params.id)) {
             if (req.params.id>0) {
                 if (req.user.rank === "owner") {
-                    let idOwner = await appartRepo.getOwnerByAppart(req.params.id);
-                    console.log("rank : " + req.user.rank + ", id : " + req.user.userId + ", owner id : " + idOwner[0]['owner']);
+                    let idOwner = await this.repository.getOwnerByAppart(req.params.id);
                     if (idOwner[0]['owner'] === req.user.userId) {
-                        let results = await appartRepo.delAppart(req.params.id, idOwner[0]['owner']);
+                        let results = await this.repository.delAppart(req.params.id, idOwner[0]['owner']);
                         if (!results) {
-                            res.status(500).json({error: "Error during delete appartments"});
+                            res.status(500).json({error: "Une erreur est survenue lors de la suppression de l'appartement"});
                         }else{
                             return "ok";
                         }
                     }else{
-                        return "You are not the owner of this appartment.";
+                        return "Vous n'êtes pas le propriétaire de cet appartement";
                     }
                 }else if (req.user.rank === "admin") {
-                    let idOwner = await appartRepo.getOwnerByAppart(req.params.id);
-                        let results = await appartRepo.delAppart(req.params.id, idOwner[0]['owner']);
+                    let idOwner = await this.repository.getOwnerByAppart(req.params.id);
+                        let results = await this.repository.delAppart(req.params.id, idOwner[0]['owner']);
                         if (!results) {
-                            res.status(500).json({error: "Error during delete appartments"});
+                            res.status(500).json({error: "Une erreur est survenue lors de la suppression de l'appartement"});
                         }else{
                             return "ok";
                         }
                 }else{
-                    return "Wrong rank";
+                    return "Mauvais rank";
                 }
             }else{
-                return "Wrong ID under 0";
+                return "Mauvais id";
             }
         }else{
-            return "ID is not a number";
+            return "Id de mauvais type";
         }
     }
 
@@ -93,9 +110,58 @@ class AppartService {
             if (appart !== undefined && Object.keys(appart).length) {
                 if (appart.owner != userId && !isAdmin) return "Permission refusée";
                 const resDb = await this.repository.editAppart(appartId, newData);
-                if (resDb.affectedRows > 0) return "Appartement édité";
+                if (resDb.affectedRows > 0) return {message: "Logement édité", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
             }
-            return "Appartement inexistant";
+            return "Logement inexistant";
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+    
+    async validAppart(appartId){
+        if (appartId) {
+            const stat = await this.repository.getStatusByAppart(appartId);
+            if (stat[0]['status'] == "en attente") {
+                let object = [];
+                object['status']= "dispo";
+                const resDb = await this.repository.editAppart(appartId, object);
+                if (resDb.affectedRows>0) {
+                    const idOwner = await this.repository.getOwnerByAppart(appartId);
+                    console.log(idOwner);
+                    let newRank = "owner";
+                    const resOwner = await this.userRepo.changeRankById(newRank, idOwner[0]['owner'])
+                    if (resOwner.affectedRows>0) {
+                        return {message: "Logement validé", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
+                    }else{
+                        return "Erreur, le rôle du propriétaire n'a pas été modifié";
+                    }
+                }else{
+                    return "Aucun logements n'a été validé";
+                }
+            }else{
+                return "Logement déjà validé";
+            }
+        }else{
+            return "Merci de préciser l'id.";
+        }
+    }
+
+    async searchAppartBy(query){
+        try {
+            let authorized = ["id","owner","title","address","status","price","area","nb_rooms","max_people"];
+            for(let key in query)
+                if(!authorized.includes(key)) return "Erreur, mauvais paramètres";
+
+            let resRepo = await this.repository.searchAppartBy(query);
+            if (resRepo) {
+                for(const appart in resRepo){
+                    resRepo[appart].infos = `${baseUrl}/apparts/${resRepo[appart].id}`;
+                }
+                return resRepo;
+            }else{
+                return false;
+            }
         } catch (error) {
             console.log(error);
             return false;
