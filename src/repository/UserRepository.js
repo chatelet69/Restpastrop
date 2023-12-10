@@ -80,6 +80,7 @@ class UserRepository {
             })
         });
     }
+
     async patchUserById(userId, data){
         let sqlQuery = "UPDATE users SET id = id";
         for (const key in data) sqlQuery += `, ${key} = ?`;

@@ -95,6 +95,27 @@ class AppartRepository {
             });
         });
     }
+
+    async delAppart(id, idOwner){
+        return new Promise ((resolve, reject) => {
+            this.db.query("DELETE FROM apparts WHERE id = ? AND owner = ?", [id, idOwner], (error, results) => {
+                if(error) reject(error);
+                resolve(results);
+            })
+        })
+    }
+
+    async editAppart(appartId, data) {
+        let sqlQuery = "UPDATE apparts set ";
+        for (const key in data) sqlQuery += `${key} = ? `;
+        sqlQuery+= "WHERE id = ?";
+        return new Promise ((resolve, reject) => {
+            this.db.query(sqlQuery, [Object.values(data), appartId], (error, results) => {
+                if(error) reject(error);
+                resolve(results);
+            })
+        })
+    }
 }
 
 module.exports = AppartRepository;
