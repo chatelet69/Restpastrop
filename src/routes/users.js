@@ -27,6 +27,8 @@ router.use("/users/search/by", [getMethodCheck, authMiddleware, authAdminMiddlew
 
 // Post method
 
+router.post("/users/create", [authMiddleware, authAdminMiddleware], userController.createUser);
+
 router.post("/register", userController.register);
 
 router.post("/login", userController.authLogin);
