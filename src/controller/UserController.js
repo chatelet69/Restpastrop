@@ -11,7 +11,7 @@ class UserController {
             else res.status(403).json({message: "error"});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during login"});
+            res.status(500).json({error: "Une erreur est survenue durant la connexion"});
         }
     }
 
@@ -22,7 +22,7 @@ class UserController {
             res.status(200).json({message: "logged", user: userData});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during get my user"});
+            res.status(500).json({error: "Une erreur est survenue durant la récupération du user"});
         }
     }
 
@@ -32,7 +32,7 @@ class UserController {
             res.status(200).json({message: "success", users: usersData});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during get all users"});
+            res.status(500).json({error: "Une erreur est survenue durant la récupération de tous les users"});
         }
     }
 
@@ -43,7 +43,7 @@ class UserController {
             res.status(200).json(userData);
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during getting the user"});
+            res.status(500).json({error: "Une erreur est survenue durant la récupération du user"});
         }
     }
 
@@ -55,7 +55,7 @@ class UserController {
             else res.status(403).json({message: "error"});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during register"});
+            res.status(500).json({error: "Une erreur est survenue durant l'inscription"});
         }
     }
 
@@ -66,11 +66,11 @@ class UserController {
                 const resData = await userService.search(data);
                 res.status(200).json(resData);
             } else {
-                res.status(400).json({message: "need a search query", documentation: "https://doc"});
+                res.status(400).json({message: "Paramètres de recherche manquants", documentation: "https://doc"});
             }
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during search"});
+            res.status(500).json({error: "Une erreur est survenue durant la recherche"});
         }
     }
 
@@ -80,13 +80,13 @@ class UserController {
             const check = await userService.getUserService(userIdDelete);
             if (check) {
                 userService.deleteUserById(userIdDelete);
-                res.status(200).json({message: "successfuly deleted"});
+                res.status(200).json({message: "Suppression validée avec succès"});
             } else {
-                res.status(403).json({message: "error", cause: "user dosn't exist"});
+                res.status(403).json({message: "error", cause: "Cet utilisateur n'existe pas"});
             }
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Error during delete"});
+            res.status(500).json({error: "Une erreur est survenue durant la suppression"});
         }
     }
 
