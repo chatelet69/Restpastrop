@@ -37,5 +37,8 @@ router.patch("/apparts/validate/:id", [authMiddleware, authAdminMiddleware], (re
     appartControl.validAppart(req, res);
 });
 
+router.get("/apparts/search/by", [authMiddleware, authorizationMiddleware], (req, res) => {
+    appartControl.searchAppartBy(req, res);
+})
 
 module.exports = router;

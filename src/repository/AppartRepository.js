@@ -82,6 +82,18 @@ class AppartRepository {
             });
         });
     }
+
+    async searchAppartBy(query){
+        let sqlQuery = "SELECT * FROM apparts WHERE 1=1"
+        for(let key in query) sqlQuery+= " AND " + key + "=?";
+        console.log(sqlQuery);
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [Object.values(query)], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
 }
 
 module.exports = AppartRepository;
