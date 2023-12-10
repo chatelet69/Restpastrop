@@ -16,7 +16,7 @@ class ReservationController {
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Error during post reservation`});
+            res.status(500).json({error: `Une erreur est survenue durant la création de la réservation`});
         }
     }
 

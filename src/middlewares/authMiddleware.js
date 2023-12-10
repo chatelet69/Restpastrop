@@ -14,7 +14,7 @@ const authMiddleware = (req, res, next) => {
             res.status(500).json({error: "expired_token"});
         }
     } else {
-        return res.status(403).json({message: "unauthorized"});
+        return res.status(403).json({message: "Vous n'êtes pas autorisé à appeler l'API."});
     }
 };
 

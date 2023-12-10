@@ -2,6 +2,7 @@ const Reservation               = require("../model/Reservation");
 const ReservationRepository     = require("../repository/ReservationRepository");
 const AppartRepository          = require("../repository/AppartRepository");
 const moment                    = require("moment");
+const baseUrl                   = require("../../config.json").baseUrl;
 
 class ReservationService {
     reservationRepository;
@@ -13,30 +14,33 @@ class ReservationService {
 
     async bookAppart(data) {
         try {
-            for (const key in data) if (data[key] === undefined) return {error: "data_missing_or_unauthentified"};
+            for (const key in data) if (data[key] === undefined) return {error: "Date manquante ou non identifiée"};
             
-            if (moment(data.startDate).isBefore(moment())) return {message: "Date de début est dans le passé"};
-            if (moment(data.endDate).isBefore(moment())) return {message: "Date de fin est dans le passé"};
+            if (moment(data.startDate).isBefore(moment())) return {message: "La date de début est dans le passé"};
+            if (moment(data.endDate).isBefore(moment())) return {message: "La date de fin est dans le passé"};
             if (moment(data.endDate).isBefore(data.startDate)) return {message: "La date de fin est avant la date de début"};
             
             const result = await this.checkAvailabilityAppart(data.appartId, data.endDate, data.startDate);
             if (result.isAvailable) {
                 const res = await this.appartRepository.getAppartById(data.appartId);
                 if (res == 0) {
-                    return {message: "l'appart n'existe pas"};
+                    return {message: "le logement n'existe pas"};
                 } else {
                     const booked = await this.reservationRepository.saveReservation(data);
                     if (booked.affectedRows) {          // Vérifie que l'insert a bien affectée une ligne
                         return {
-                            message: "appart_booked",
-                            reservationId: booked.insertId      // Renvoie l'id de la ligne insérée
+                            message: "Logement réservé",
+                            viewReservation: {
+                                lien: `${baseUrl}/reservation/${booked.insertId}`,
+                                method: "GET"
+                                  }      // Renvoie l'id de la ligne insérée
                         };
                     } else {
-                        return {error: "error during save reservation"};
+                        return {error: "Une erreur est survenue durant la réservation."};
                     }
                 }
             } else {
-                return {message: "appart_already_booked"};
+                return {message: "Cet appartement est déjà réservé."};
             }
         } catch (error) {
             console.log(error);
@@ -63,12 +67,12 @@ class ReservationService {
         const isIdAppartEqual = id.includes(resultReservation[0].appartId);
     
         if (resultReservation.length === 0) {
-            return {message : "l'appartement n'existe pas"};
+            return {message : "Ce logement n'existe pas"};
         } else {
             if (resultReservation[0].status === "BOOKED") {
                 if (resultReservation[0].clientId == userId || isIdAppartEqual || isAdmin) {
                     const result = await this.reservationRepository.cancelReservation(idReservation);
-                    if (result.affectedRows) return {message : "Reservation annulée"};
+                    if (result.affectedRows) return {message : "Reservation annulée", info: {lien: `${baseUrl}/reservation/${idReservation}` ,method: "GET"}};
                     else return {error: "Impossible d'annuler la réservation"};
                 } else {
                     return {message : 'Annulation de la reservation impossible'};

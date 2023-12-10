@@ -46,8 +46,9 @@ class AppartRepository {
 
     async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people) {
         return new Promise ((resolve, reject) => {
-            this.db.query("INSERT INTO apparts (owner, title, address, status, price, area, nb_rooms, max_people) VALUES (?,?,?,?,?,?,?,?)", [idOwner,title,address,status,price,area,nb_rooms,max_people], (error, results) => {
+            this.db.query("INSERT INTO apparts (owner, title, address, status, price, area, nb_rooms, max_people) VALUES (?,?,?,?,?,?,?,?) RETURNING *", [idOwner,title,address,status,price,area,nb_rooms,max_people], (error, results) => {
                 if (error) reject(error);
+                console.log(results)
                 resolve(results);
             });
         });

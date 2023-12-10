@@ -19,7 +19,7 @@ router.get("/users/:id", [authMiddleware, authAdminMiddleware], (req, res) => {
     userController.getUserById(req, res);
 });
 
-router.get("/users/me", [authMiddleware, authorizationMiddleware], (req, res) => {
+router.get("/me", [authMiddleware, authorizationMiddleware], (req, res) => {
     userController.myUser(req, res);
 });
 
