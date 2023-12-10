@@ -13,4 +13,6 @@ router.post("/reservation", [authMiddleware, authorizationMiddleware, dateTimeMi
 // Annuler une réservation
 router.patch('/reservation/cancel', [authMiddleware, authorizationMiddleware, checkIfAdmin], reservationController.cancelReservation);
 
+router.get("/reservation/:id", [authMiddleware, authorizationMiddleware], reservationController.getReservation);
+
 module.exports = router;

@@ -29,6 +29,17 @@ class ReservationController {
         const result = await reservationService.cancelReservation(data.idUser, data.idReservation, data.isAdmin);
         res.status(200).json(result);
     }
+
+    async getReservation(req, res){
+        const idReservation = req.params.id;
+        const userId = req.user.userId;
+        const result = await reservationService.getReservation(idReservation, userId);
+        if (result) {
+            res.status(200).json(result);
+        }else{
+            res.status(500).json({error: "Erreur durant la récupération de la reservation"});
+        }
+    }
 }
 
 module.exports = ReservationController;
