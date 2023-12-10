@@ -11,7 +11,7 @@ class AppartController{
             res.status(200).json({count: data.length, apparts: data});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Erreur durant la récupération des appartements"});
+            res.status(500).json({error: "Erreur durant la récupération des logements"});
         }
     }
 
@@ -19,10 +19,10 @@ class AppartController{
         try {
             let data = await this.service.getAppartById(req.params.id);
             if (data) res.status(200).json(data);
-            else res.status(500).json({error: "Erreur durant la récupération de l'appartement"});
+            else res.status(500).json({error: "Erreur durant la récupération du logement"});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Erreur durant la récupération de l'appart ${req.params.id}`});
+            res.status(500).json({error: `Erreur durant la récupération du logement ${req.params.id}`});
         }
     }
 
@@ -45,7 +45,7 @@ class AppartController{
             else res.status(500).json({error: result});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Erreur durant la création de l'appartement"});
+            res.status(500).json({error: "Erreur durant la création du logement"});
         }
     }
     
@@ -56,16 +56,16 @@ class AppartController{
             if (check) {
                 let result = await this.service.deleteAppart(req, res);
                 if (result === "ok") {
-                    res.status(200).json({message: "Appartement supprimé"});
+                    res.status(200).json({message: "Logement supprimé"});
                 } else {
                     res.status(403).json({error: result});
                 }
             }else{
-                res.status(403).json({error: "Cet appartement n'existe pas."});
+                res.status(403).json({error: "Ce logement n'existe pas."});
             }
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Une erreur est survenue lors de la suppressio de l'appartement ${req.params.id}`});
+            res.status(500).json({error: `Une erreur est survenue lors de la suppression du logement ${req.params.id}`});
         }
     }
 
@@ -77,10 +77,10 @@ class AppartController{
             const isAdmin = (req.user.rank === "admin") ? true : false;
             let resEdit = await this.service.editAppart(userId, appartId, data, isAdmin);
             if (resEdit) res.status(200).json({message: resEdit});
-            else res.status(400).json({message: "Error during request"});
+            else res.status(400).json({message: "Une erreur est survenue durant la requête"});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Error during the patch of the appartment ${req.params.id}`});
+            res.status(500).json({error: `Une erreur est survenue durant la modification du logement${req.params.id}`});
         }
     }
     
@@ -89,10 +89,10 @@ class AppartController{
             const appartId = req.params.id;
             let resValid = await this.service.validAppart(appartId);
             if (resValid == "ok") res.status(200).json({message: "Logement validé !"});
-            else res.status(400).json({message: "resValid"});
+            else res.status(400).json({message: resValid});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Error during the patch of the appartment ${req.params.id}`});
+            res.status(500).json({error: `Une erreur est survenue durant la validation du logement ${req.params.id}`});
         }
     }
 
