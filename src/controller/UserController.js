@@ -59,6 +59,18 @@ class UserController {
         }
     }
 
+    async createUser(req, res) {
+        try {
+            const userData = req.body;
+            const resCreatedUser = await userService.createUser(userData);
+            if (resCreatedUser) res.status(200).json(resCreatedUser);
+            else res.status(400).json({error: "Erreur durant la création"});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: "Erreur durant la création de l'utilisateur"});
+        }
+    }
+
     async search(req, res) {
         try {
             const data = req.query;

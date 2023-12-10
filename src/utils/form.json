@@ -1,0 +1,11 @@
+{
+    "usersKeysDb": [
+        "username", "password", "name", "lastname", "email", "rank"
+    ],
+    "authorizedKeysUser": [
+        "username", "password", "rank", "email", "name", "lastname"
+    ],
+    "requiredRegisterKeys": [
+        "username", "password", "email", "name", "lastname"
+    ]
+}
