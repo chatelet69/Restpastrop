@@ -2,6 +2,7 @@ const Reservation               = require("../model/Reservation");
 const ReservationRepository     = require("../repository/ReservationRepository");
 const AppartRepository          = require("../repository/AppartRepository");
 const moment                    = require("moment");
+const baseUrl                   = require("../../config.json").baseUrl;
 
 class ReservationService {
     reservationRepository;
@@ -29,7 +30,10 @@ class ReservationService {
                     if (booked.affectedRows) {          // Vérifie que l'insert a bien affectée une ligne
                         return {
                             message: "Logement réservé",
-                            reservationId: booked.insertId      // Renvoie l'id de la ligne insérée
+                            viewReservation: {
+                                lien: `${baseUrl}/reservation/${booked.insertId}`,
+                                method: "GET"
+                                  }      // Renvoie l'id de la ligne insérée
                         };
                     } else {
                         return {error: "Une erreur est survenue durant la réservation."};
@@ -68,7 +72,7 @@ class ReservationService {
             if (resultReservation[0].status === "BOOKED") {
                 if (resultReservation[0].clientId == userId || isIdAppartEqual || isAdmin) {
                     const result = await this.reservationRepository.cancelReservation(idReservation);
-                    if (result.affectedRows) return {message : "Reservation annulée"};
+                    if (result.affectedRows) return {message : "Reservation annulée", info: {lien: `${baseUrl}/reservation/${idReservation}` ,method: "GET"}};
                     else return {error: "Impossible d'annuler la réservation"};
                 } else {
                     return {message : 'Annulation de la reservation impossible'};

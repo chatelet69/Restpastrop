@@ -16,7 +16,11 @@ class AppartService {
     async getAllApparts() {
         try {
             let apparts = await this.repository.getAllApparts();
-            for (const appart in apparts) apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
+            for (const appart in apparts){
+                apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
+                apparts[appart].lien = `${baseUrl}/apparts/${apparts[appart].id}`;
+
+            }
             return apparts;
         } catch (error) {
             console.log("Une erreur est survenue lors de la recupération des logements : ", error);
@@ -53,7 +57,7 @@ class AppartService {
                         return "Une erreur est survenue lors de la création de l'appartement";
                     }else{
                         if(idOwner != userId && await this.userRepo.getRankById(idOwner) == "user") await this.userRepo.changeRankById("owner", idOwner); 
-                        return "ok";
+                        return results;
                     }
                 }else{
                     return "Id invalide";
@@ -106,7 +110,7 @@ class AppartService {
             if (appart !== undefined && Object.keys(appart).length) {
                 if (appart.owner != userId && !isAdmin) return "Permission refusée";
                 const resDb = await this.repository.editAppart(appartId, newData);
-                if (resDb.affectedRows > 0) return "Logement édité";
+                if (resDb.affectedRows > 0) return {message: "Logement édité", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
             }
             return "Logement inexistant";
         } catch (error) {
@@ -128,7 +132,7 @@ class AppartService {
                     let newRank = "owner";
                     const resOwner = await this.userRepo.changeRankById(newRank, idOwner[0]['owner'])
                     if (resOwner.affectedRows>0) {
-                        return "";
+                        return {message: "Logement validé", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
                     }else{
                         return "Erreur, le rôle du propriétaire n'a pas été modifié";
                     }
