@@ -74,8 +74,34 @@ class ReservationService {
                     return {message : 'Annulation de la reservation impossible'};
                 }
             } else {
-                return {message : "Réservation déjà annulée"};
+                return {message : "Réservations déjà annulée"};
             }
+        }
+    }
+
+    async getReservation(idReservation, userId){
+        try {
+            if (idReservation) {
+                if (idReservation>0) {
+                    let result = await this.reservationRepository.getReservationById(idReservation);
+                    let idOwner = result[0]['clientId'];
+
+                    if (result) {
+                        if (idOwner == userId) {
+                            return result;
+                        }else{
+                            return false;
+                        }
+                    }else{
+                        return false;
+                    }
+                }
+            }else{
+                return false;
+            }
+        } catch (error) {
+            console.log(error)
+            return false;
         }
     }
 }
