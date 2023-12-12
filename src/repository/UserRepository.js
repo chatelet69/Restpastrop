@@ -1,4 +1,5 @@
-const DatabaseConnection = require("./Database");
+const DatabaseConnection    = require("./Database");
+const userKeys              = require("../utils/form.json").usersKeysDb;
 
 class UserRepository {
     db;
@@ -49,9 +50,10 @@ class UserRepository {
     }
 
     createUser(userData) {
-        const sqlQuery = "INSERT INTO users (username, password, name, lastname, email, rank) VALUES (?,?,?,?,?, 'user')";
+        const sqlQuery = `INSERT INTO users (${userKeys}) VALUES (?,?,?,?,?,?)`;
+        for (const key in userKeys) if (userData[userKeys[key]] === undefined) userData[userKeys[key]] = "null";
         return new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, userData, (error, result) => {
+            this.db.execute(sqlQuery, Object.values(userData), (error, result) => {
                 if (error) throw (error);
                 resolve(result);
             })
@@ -62,7 +64,7 @@ class UserRepository {
         let sqlQuery = "SELECT id,username FROM users WHERE 1 = 1";
         for (const key in dataSearch) sqlQuery += ` AND ${key} = ?`;
         return new Promise((resolve, reject) => {
-            this.db.query(sqlQuery, Object.values(dataSearch), (error, result) => {
+            this.db.execute(sqlQuery, Object.values(dataSearch), (error, result) => {
                 if (error) throw (error);
                 resolve(result);
             })
@@ -78,6 +80,7 @@ class UserRepository {
             })
         });
     }
+
     async patchUserById(userId, data){
         let sqlQuery = "UPDATE users SET id = id";
         for (const key in data) sqlQuery += `, ${key} = ?`;

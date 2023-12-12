@@ -1,9 +1,13 @@
-const User              = require("../model/User");
-const UserRepository    = require("../repository/UserRepository");
-const sha512            = require('js-sha512');
-const jwt               = require("jsonwebtoken");
-const secret            = require("../../config.json").secretJwt;
-const baseUrl           = require("../../config.json").baseUrl;
+const User                  = require("../model/User");
+const UserRepository        = require("../repository/UserRepository");
+const sha512                = require('js-sha512');
+const jwt                   = require("jsonwebtoken");
+const secret                = require("../../config.json").secretJwt;
+const baseUrl               = require("../../config.json").baseUrl;
+const authorizedKeysUser    = require("../utils/form.json").authorizedKeysUser;
+const requiredRegisterKeys  = require("../utils/form.json").requiredRegisterKeys;
+const UtilService           = require("./UtilService");
+const utilService           = new UtilService();
 
 class UserService {
     userRepository;
@@ -63,14 +67,29 @@ class UserService {
     async registerService(registerData) {
         try {
             let returnVal = false;
-            const required = ["username", "password", "email", "name", "lastname"];
-            for (let key in required)
-                if (!Object.hasOwn(registerData, required[key])) return false;
-            registerData.password = sha512(registerData.password);
-            const finalValues = [registerData.username, registerData.password, registerData.name, registerData.lastname, registerData.email];
-            const resDb = await this.userRepository.createUser(finalValues);
-            if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
+            if (utilService.checkKeysInData(registerData, requiredRegisterKeys, requiredRegisterKeys)) {
+                registerData.password = sha512(registerData.password);
+                const resDb = await this.userRepository.createUser(registerData);
+                if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
+            }
             return returnVal;
+        } catch (error) {
+            console.log(error);
+            return false;
+        }
+    }
+
+    async createUser(userData) {
+        try {
+            const required = ["username", "password"];
+            if (utilService.checkKeysInData(userData, required, authorizedKeysUser)) {
+                userData.password = sha512(userData.password);
+                const resDb = await this.userRepository.createUser(userData);
+                if (resDb.affectedRows) return {message: "Utilisateur créée"};
+                else return false;
+            } else {
+                return {error: "Données manquantes ou erronées"};
+            }
         } catch (error) {
             console.log(error);
             return false;
@@ -133,6 +152,14 @@ class UserService {
             console.log(error);
             return "Une erreur est survenue durant la modification de l'utilisateur.";
         }
+    }
+
+    checkKeysInData(data, required, authorized) {
+        for (let key in required)
+            if (!Object.hasOwn(data, required[key])) return false;
+        for (let key in data)
+            if (!authorized.includes(key)) return false;
+        return true;
     }
 }
 

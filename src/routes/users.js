@@ -19,13 +19,15 @@ router.get("/users/:id", [authMiddleware, authAdminMiddleware], (req, res) => {
     userController.getUserById(req, res);
 });
 
-router.get("/users/me", [authMiddleware, authorizationMiddleware], (req, res) => {
+router.get("/me", [authMiddleware, authorizationMiddleware], (req, res) => {
     userController.myUser(req, res);
 });
 
 router.use("/users/search/by", [getMethodCheck, authMiddleware, authAdminMiddleware], userController.search);
 
 // Post method
+
+router.post("/users/create", [authMiddleware, authAdminMiddleware], userController.createUser);
 
 router.post("/register", userController.register);
 
