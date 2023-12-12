@@ -153,6 +153,14 @@ class UserService {
             return "Une erreur est survenue durant la modification de l'utilisateur.";
         }
     }
+
+    checkKeysInData(data, required, authorized) {
+        for (let key in required)
+            if (!Object.hasOwn(data, required[key])) return false;
+        for (let key in data)
+            if (!authorized.includes(key)) return false;
+        return true;
+    }
 }
 
 module.exports = UserService;
