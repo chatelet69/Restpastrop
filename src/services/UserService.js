@@ -6,6 +6,8 @@ const secret                = require("../../config.json").secretJwt;
 const baseUrl               = require("../../config.json").baseUrl;
 const authorizedKeysUser    = require("../utils/form.json").authorizedKeysUser;
 const requiredRegisterKeys  = require("../utils/form.json").requiredRegisterKeys;
+const UtilService           = require("./UtilService");
+const utilService           = new UtilService();
 
 class UserService {
     userRepository;
@@ -65,7 +67,7 @@ class UserService {
     async registerService(registerData) {
         try {
             let returnVal = false;
-            if (this.checkKeysInData(registerData, requiredRegisterKeys, requiredRegisterKeys)) {
+            if (utilService.checkKeysInData(registerData, requiredRegisterKeys, requiredRegisterKeys)) {
                 registerData.password = sha512(registerData.password);
                 const resDb = await this.userRepository.createUser(registerData);
                 if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
@@ -80,7 +82,7 @@ class UserService {
     async createUser(userData) {
         try {
             const required = ["username", "password"];
-            if (this.checkKeysInData(userData, required, authorizedKeysUser)) {
+            if (utilService.checkKeysInData(userData, required, authorizedKeysUser)) {
                 userData.password = sha512(userData.password);
                 const resDb = await this.userRepository.createUser(userData);
                 if (resDb.affectedRows) return {message: "Utilisateur créée"};

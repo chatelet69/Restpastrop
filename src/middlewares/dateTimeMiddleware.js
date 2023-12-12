@@ -7,16 +7,20 @@ const dateTimeMiddleware = (req, res, next) => {
     };
 
     for (const date in formatDates) {
-        // Vérifie si une heure est indiquée dans les dates envoyées
-        if (formatDates[date].includes(':')) formatDates[date] = moment(formatDates[date], "YYYY-MM-DD HH:mm:ss");
-        // Afin d'adapter le format des dates 
-        else formatDates[date] = moment(formatDates[date], "YYYY-MM-DD");
-        formatDates[date] = formatDates[date].format("YYYY-MM-DD HH:mm:ss");
+        if (formatDates[date]) {
+            // Vérifie si une heure est indiquée dans les dates envoyées
+            if (formatDates[date].includes(':')) formatDates[date] = moment(formatDates[date], "YYYY-MM-DD HH:mm:ss");
+            // Afin d'adapter le format des dates 
+            else formatDates[date] = moment(formatDates[date], "YYYY-MM-DD");
+            formatDates[date] = formatDates[date].format("YYYY-MM-DD HH:mm:ss");
+        }
     }
 
     // On réaffecte les dates formatées
-    req.body.startDate = formatDates.starDate;
-    req.body.endDate = formatDates.endDate;
+    if (formatDates.starDate || formatDates.endDate) {
+        req.body.startDate = formatDates.starDate;
+        req.body.endDate = formatDates.endDate;
+    }
     next();
 }
 
