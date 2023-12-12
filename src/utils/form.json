@@ -7,5 +7,7 @@
     ],
     "requiredRegisterKeys": [
         "username", "password", "email", "name", "lastname"
-    ]
+    ],
+    "editReservationError": "Erreur durant la modification de la réservation",
+    "getReservationError": "Erreur durant la récupération de la reservation"
 }
