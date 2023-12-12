@@ -3,6 +3,8 @@ const ReservationRepository     = require("../repository/ReservationRepository")
 const AppartRepository          = require("../repository/AppartRepository");
 const moment                    = require("moment");
 const baseUrl                   = require("../../config.json").baseUrl;
+const UtilService               = require("./UtilService");
+const utilService               = new UtilService();
 
 class ReservationService {
     reservationRepository;
@@ -16,9 +18,8 @@ class ReservationService {
         try {
             for (const key in data) if (data[key] === undefined) return {error: "Date manquante ou non identifiée"};
             
-            if (moment(data.startDate).isBefore(moment())) return {message: "La date de début est dans le passé"};
-            if (moment(data.endDate).isBefore(moment())) return {message: "La date de fin est dans le passé"};
-            if (moment(data.endDate).isBefore(data.startDate)) return {message: "La date de fin est avant la date de début"};
+            const checkdates = utilService.checkDatesPast(data.startDate, data.endDate);
+            if (checkdates !== "ok") return checkdates;
             
             const result = await this.checkAvailabilityAppart(data.appartId, data.endDate, data.startDate);
             if (result.isAvailable) {
@@ -72,7 +73,7 @@ class ReservationService {
             if (resultReservation[0].status === "BOOKED") {
                 if (resultReservation[0].clientId == userId || isIdAppartEqual || isAdmin) {
                     const result = await this.reservationRepository.cancelReservation(idReservation);
-                    if (result.affectedRows) return {message : "Reservation annulée", info: {lien: `${baseUrl}/reservation/${idReservation}` ,method: "GET"}};
+                    if (result.affectedRows) return {message : "Reservation annulée", info: {link: `${baseUrl}/reservation/${idReservation}`, method: "GET"}};
                     else return {error: "Impossible d'annuler la réservation"};
                 } else {
                     return {message : 'Annulation de la reservation impossible'};
@@ -83,16 +84,16 @@ class ReservationService {
         }
     }
 
-    async getReservation(idReservation, userId){
+    async getReservation(idReservation, userId, isAdmin){
         try {
             if (idReservation) {
                 if (idReservation>0) {
                     let result = await this.reservationRepository.getReservationById(idReservation);
-                    let idOwner = result[0]['clientId'];
-
+                    
                     if (result) {
-                        if (idOwner == userId) {
-                            return result;
+                        let idOwner = result[0]['clientId'];
+                        if (idOwner == userId || isAdmin) {
+                            return result[0];
                         }else{
                             return false;
                         }
@@ -105,6 +106,37 @@ class ReservationService {
             }
         } catch (error) {
             console.log(error)
+            return false;
+        }
+    }
+
+    async editReservation(resId, userId, editedData, isAdmin) {
+        try {
+            const authorized = ["startDate", "endDate"];
+            const reservation = (await this.reservationRepository.getReservationById(resId))[0];
+            if (reservation && (reservation.clientId === userId || isAdmin)) {
+                if (!utilService.checkKeysInData(editedData, null, authorized)) return {error: "Données manquantes ou mauvais format"};
+                
+                if (editedData.startDate === undefined) editedData.startDate = reservation.startDate;
+                if (editedData.endDate === undefined) editedData.endDate = reservation.endDate;
+
+                const checkDates = utilService.checkDatesPast(editedData.startDate, editedData.endDate);
+                if (checkDates !== "ok") return checkDates;
+
+                const checkAvailabilityAppart = await this.checkAvailabilityAppart(reservation.appartId, editedData.endDate, editedData.startDate);
+                if (checkAvailabilityAppart.isAvailable) {    
+                    editedData.resId = resId;
+                    const resDb = await this.reservationRepository.editReservation(editedData);
+                    if (resDb.affectedRows) return {message: "Réservation modifiée", infos: {link: `${baseUrl}/reservation/${resId}`, method: "GET"}};
+                    else return false;
+                } else {
+                    return {error: "Appartement non disponible"};
+                }
+            } else {
+                return {error: "Réservation inexistante ou droits insuffisants"};
+            }
+        } catch (error) {
+            console.log(error);
             return false;
         }
     }
