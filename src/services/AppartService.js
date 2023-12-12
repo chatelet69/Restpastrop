@@ -167,6 +167,40 @@ class AppartService {
             return false;
         }
     }
+
+    async getSpecByAppart(appartId){
+        try{
+           const result = await this.repository.getSpecByAppart(appartId);
+           if (result.length == 0){
+                return {
+                    message :`L'appartement ${appartId} n'a pas de spécificité.`
+                }
+           }else{
+                return result[0]
+           }
+        } catch (error){
+            console.log("Error at GetSpecByAppart : ", error);
+            return false;
+        }
+    }
+
+    async patchSpecByAppart(appartId, data, isAdmin, userId ){
+        try{
+            const resultAppartUser = await this.repository.getAppartsByOwner(userId)
+            const ids = resultAppartUser.filter(item => item.id==appartId);
+            if (ids != 0 || isAdmin) {
+                const result = await this.repository.patchSpecByAppart(appartId, data);
+            }else {
+                return {
+                    message :'La modification ne peut pas être effectuée'
+                }
+            }
+         } catch (error){
+             console.log("Error at PatchSpecByAppart : ", error);
+             return false;
+         }
+
+    }
 }
 
 module.exports = AppartService;
