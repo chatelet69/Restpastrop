@@ -7,12 +7,16 @@ const dateTimeMiddleware        = require("../middlewares/dateTimeMiddleware");
 const checkIfAdmin              = require("../middlewares/checkIfAdmin");
 const reservationController     = new ReservationController();
 
+// Récupérer une réservation
+router.get("/reservation/:id", [authMiddleware, authorizationMiddleware, checkIfAdmin], reservationController.getReservation);
+
 // Créer une réservation
 router.post("/reservation", [authMiddleware, authorizationMiddleware, dateTimeMiddleware], reservationController.postReservation);
 
 // Annuler une réservation
-router.patch('/reservation/cancel', [authMiddleware, authorizationMiddleware, checkIfAdmin], reservationController.cancelReservation);
+router.patch("/reservation/cancel", [authMiddleware, authorizationMiddleware, checkIfAdmin], reservationController.cancelReservation);
 
-router.get("/reservation/:id", [authMiddleware, authorizationMiddleware], reservationController.getReservation);
+// Modifier une réservation
+router.patch("/reservation/:id", [authMiddleware, authorizationMiddleware, checkIfAdmin, dateTimeMiddleware], reservationController.editReservation);
 
 module.exports = router;
