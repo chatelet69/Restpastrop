@@ -2,7 +2,7 @@ const Appart            = require("../model/Appart");
 const AppartRepository  = require("../repository/AppartRepository");
 const baseUrl           = require("../../config.json").baseUrl;
 const UserRepository    = require("../repository/UserRepository");
-
+const appartInexistant  = require("../utils/form.json").appartInexistant;
 
 class AppartService {
     repository;
@@ -15,7 +15,7 @@ class AppartService {
 
     async getAllApparts() {
         try {
-            let apparts = await this.repository.getAllApparts();
+            let apparts = await this.repository.getAllOnlineApparts();
             for (const appart in apparts){
                 apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
                 apparts[appart].lien = `${baseUrl}/apparts/${apparts[appart].id}`;
@@ -112,7 +112,7 @@ class AppartService {
                 const resDb = await this.repository.editAppart(appartId, newData);
                 if (resDb.affectedRows > 0) return {message: "Logement édité", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
             }
-            return "Logement inexistant";
+            return appartInexistant;
         } catch (error) {
             console.log(error);
             return false;
@@ -200,6 +200,22 @@ class AppartService {
              return false;
          }
 
+    }
+
+    async getDatesOfAppart(appartId) {
+        try {
+            const appart = (await this.repository.getAppartById(appartId))[0];
+            if (appart && appart.id == appartId) {
+                const resDb = await this.repository.getDatesOfAppart(appartId);
+                console.log(resDb);
+                return {appartId: appartId, dates: resDb};
+            } else {
+                return {error: appartInexistant};
+            }
+        } catch (error) {
+            console.log("Error at PatchSpecByAppart : ", error);
+            return false;
+        }
     }
 }
 

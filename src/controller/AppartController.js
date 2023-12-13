@@ -1,5 +1,6 @@
-const AppartService = require("../services/AppartService");
-const baseURL = require("../../config.json").baseUrl
+const AppartService         = require("../services/AppartService");
+const baseURL               = require("../../config.json").baseUrl;
+const getDatesAppartError   = require("../utils/form.json").getDatesAppartError;
 
 class AppartController{
     constructor(){
@@ -131,14 +132,25 @@ class AppartController{
         try {
             const data = req.body;
             const appartId = req.params.id;
-            const isAdmin = req.user.isAdmin
-            const userId = req.user.userId
-            console.log(data)
+            const isAdmin = req.user.isAdmin;
+            const userId = req.user.userId;
             let result = await this.service.patchSpecByAppart(appartId, data, isAdmin, userId );
             res.status(200).json(result);
         } catch (error) {
             console.log(error);
             res.status(500).json({error: `Erreur durant la modification des spécificités`});
+        }
+    }
+
+    async getDatesOfAppart(req, res) {
+        try {
+            const appartId = req.params.id;
+            let result = await this.service.getDatesOfAppart(appartId);
+            if (result) res.status(200).json(result);
+            else res.status(500).json({error: getDatesAppartError});
+        } catch (error) {
+            console.log(error);
+            res.status(500).json({error: getDatesAppartError});
         }
     }
 }

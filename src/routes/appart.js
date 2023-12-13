@@ -18,6 +18,18 @@ router.get("/apparts/:id", (req, res) => {
     appartControl.getAppart(req, res);
 });
 
+router.get("/apparts/search/by", [authMiddleware, authorizationMiddleware], (req, res) => {
+    appartControl.searchAppartBy(req, res);
+});
+
+router.get("/apparts/spec/:id", [authMiddleware, authorizationMiddleware], (req, res) => {
+    appartControl.getSpecByAppart(req, res);
+});
+
+router.get("/apparts/:id/dates", [authMiddleware, authorizationMiddleware], (req, res) => {
+    appartControl.getDatesOfAppart(req, res);
+});
+
 // Post method
 
 router.post("/apparts/create", [authMiddleware], async (req, res) =>{
@@ -37,14 +49,6 @@ router.patch("/apparts/:id", [authMiddleware], (req, res) => {
 router.patch("/apparts/validate/:id", [authMiddleware, authAdminMiddleware], (req, res) => {
     appartControl.validAppart(req, res);
 });
-
-router.get("/apparts/search/by", [authMiddleware, authorizationMiddleware], (req, res) => {
-    appartControl.searchAppartBy(req, res);
-})
-
-router.get("/apparts/spec/:id", [authMiddleware, authorizationMiddleware], (req, res) => {
-    appartControl.getSpecByAppart(req, res);
-})
 
 router.patch("/apparts/spec/:id", [authMiddleware, authorizationMiddleware, checkIfAdmin], (req, res) => {
     appartControl.patchSpecByAppart(req, res);
