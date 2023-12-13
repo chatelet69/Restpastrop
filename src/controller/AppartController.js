@@ -1,6 +1,6 @@
-const AppartService         = require("../services/AppartService");
-const baseURL               = require("../../config.json").baseUrl;
-const getDatesAppartError   = require("../utils/form.json").getDatesAppartError;
+const AppartService     = require("../services/AppartService");
+const baseURL           = require("../../config.json").baseUrl;
+const forms             = require("../utils/form.json");
 
 class AppartController{
     constructor(){
@@ -10,10 +10,11 @@ class AppartController{
     async getAllApparts(req, res) {
         try {
             let data = await this.service.getAllApparts();
-            res.status(200).json({count: data.length, apparts: data});
+            if (data) res.status(200).json({count: data.length, apparts: data});
+            else res.status(500).json({error: forms.getAppartsError})
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: "Erreur durant la récupération des logements"});
+            res.status(500).json({error: forms.getAppartsError});
         }
     }
 
@@ -21,10 +22,10 @@ class AppartController{
         try {
             let data = await this.service.getAppartById(req.params.id);
             if (data) res.status(200).json(data);
-            else res.status(500).json({error: "Erreur durant la récupération du logement"});
+            else res.status(500).json({error: forms.getAppartError});
         } catch (error) {
             console.log(error);
-            res.status(500).json({error: `Erreur durant la récupération du logement ${req.params.id}`});
+            res.status(500).json({error: forms.getAppartError});
         }
     }
 
@@ -62,11 +63,11 @@ class AppartController{
                 } else {
                     res.status(403).json({error: result});
                 }
-            }else{
-                res.status(403).json({error: "Ce logement n'existe pas."});
+            } else {
+                res.status(403).json({error: forms.appartInexistant});
             }
         } catch (error) {
-            console.log(error);
+            console.log("Erreur deleteAppart : ", error);
             res.status(500).json({error: `Une erreur est survenue lors de la suppression du logement ${req.params.id}`});
         }
     }
@@ -76,13 +77,13 @@ class AppartController{
             const userId = req.user.userId;
             const appartId = req.params.id;
             const data = req.body;
-            const isAdmin = (req.user.rank === "admin") ? true : false;
+            const isAdmin = req.user.isAdmin;
             let resEdit = await this.service.editAppart(userId, appartId, data, isAdmin);
             if (resEdit) res.status(200).json({message: resEdit});
             else res.status(400).json({message: "Une erreur est survenue durant la requête"});
         } catch (error) {
-            console.log(error);
-            res.status(500).json({error: `Une erreur est survenue durant la modification du logement${req.params.id}`});
+            console.log("Erreur editAppart : ", error);
+            res.status(500).json({error: forms.editAppartError});
         }
     }
     
@@ -106,14 +107,14 @@ class AppartController{
                 if (apparts) {
                     res.status(200).json(apparts);
                 }else{
-                    res.status(400).json({message: "Erreur durant la récupération des logements"})
+                    res.status(400).json({error: forms.getAppartsError})
                 }
             }else{
                 res.status(400).json({message: "Paramètres manquants"});
             }
         } catch (error) {
-            console.log(error);
-            res.status(500).json({error: "Erreur durant la recherche d'un appartement."});
+            console.log("Erreur searchAppartBy : ", error);
+            res.status(500).json({error: forms.getAppartsError});
         }
     }
 
@@ -123,7 +124,7 @@ class AppartController{
             let data = await this.service.getSpecByAppart(appartId);
             res.status(200).json(data);
         } catch (error) {
-            console.log(error);
+            console.log("Erreur getSpecByAppart : ", error);
             res.status(500).json({error: `Erreur durant la récupération des spécificités`});
         }
     }
@@ -137,7 +138,7 @@ class AppartController{
             let result = await this.service.patchSpecByAppart(appartId, data, isAdmin, userId );
             res.status(200).json(result);
         } catch (error) {
-            console.log(error);
+            console.log("Erreur controleur patchSpecsByAppart : ", error);
             res.status(500).json({error: `Erreur durant la modification des spécificités`});
         }
     }
@@ -147,10 +148,10 @@ class AppartController{
             const appartId = req.params.id;
             let result = await this.service.getDatesOfAppart(appartId);
             if (result) res.status(200).json(result);
-            else res.status(500).json({error: getDatesAppartError});
+            else res.status(500).json({error: forms.getDatesAppartError});
         } catch (error) {
-            console.log(error);
-            res.status(500).json({error: getDatesAppartError});
+            console.log("Erreur controleur getDatesOfAppart : ", error);
+            res.status(500).json({error: forms.getDatesAppartError});
         }
     }
 }

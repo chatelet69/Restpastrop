@@ -36,13 +36,15 @@ router.post("/apparts/create", [authMiddleware], async (req, res) =>{
     await appartControl.postAppart(req, res);
 });
 
+// Delete
+
 router.delete("/apparts/:id",[authMiddleware], async (req, res) => {
     await appartControl.deleteAppart(req, res);
 })
 
 // Patch Method
 
-router.patch("/apparts/:id", [authMiddleware], (req, res) => {
+router.patch("/apparts/:id", [authMiddleware, checkIfAdmin], (req, res) => {
     appartControl.editAppart(req, res);
 });
 

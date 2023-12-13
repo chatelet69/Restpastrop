@@ -18,13 +18,12 @@ class AppartService {
             let apparts = await this.repository.getAllOnlineApparts();
             for (const appart in apparts){
                 apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
-                apparts[appart].lien = `${baseUrl}/apparts/${apparts[appart].id}`;
-
+                apparts[appart].link = `${baseUrl}/apparts/${apparts[appart].id}`;
             }
             return apparts;
         } catch (error) {
             console.log("Une erreur est survenue lors de la recupération des logements : ", error);
-            return "error";
+            return false;
         }
     }
 
