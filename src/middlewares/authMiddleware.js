@@ -10,7 +10,7 @@ const authMiddleware = (req, res, next) => {
             req.user = infos;
             next();
         } catch (error) {
-            console.log(error);
+            //console.log(error);
             res.status(500).json({error: "expired_token"});
         }
     } else {
