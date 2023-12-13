@@ -9,5 +9,7 @@
         "username", "password", "email", "name", "lastname"
     ],
     "editReservationError": "Erreur durant la modification de la réservation",
-    "getReservationError": "Erreur durant la récupération de la reservation"
+    "getReservationError": "Erreur durant la récupération de la reservation",
+    "getDatesAppartError": "Erreur durant la récupération des dates",
+    "appartInexistant": "Logement inexistant"
 }
