@@ -144,7 +144,7 @@ class UserController {
         }
     }
 
-    async search(req, res) {
+    /*async search(req, res) {
         try {
             const data = req.query;
             if (Object.keys(data).length) {     // Renvoit un tableau des clés de l'objet, dont on récupère la taille
@@ -157,44 +157,7 @@ class UserController {
             console.log(error);
             res.status(500).json({error: "Error during search"});
         }
-    }
-
-    async deleteUser(req, res) {
-        try {
-            const userIdDelete = req.params.id;
-            const check = await userService.getUserService(userIdDelete);
-            if (check) {
-                userService.deleteUserById(userIdDelete);
-                res.status(200).json({message: "successfuly deleted"});
-            } else {
-                res.status(403).json({message: "error", cause: "user dosn't exist"});
-            }
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({error: "Error during delete"});
-        }
-    }
-
-    async patchUser(req, res){
-        try {
-            const userId = req.params.id;
-            const check = await userService.getUserService(userId);
-            if(check){
-                let result = await userService.patchUserById(userId, req);
-                if (result === "ok") {
-                    res.status(200).json({message: "Modification réalisée avec succès !", redirection: {lien:`${baseUrl}/users/${req.params.id}`, methode: "GET"}});                    
-                }else{
-                    console.log(result)
-                    res.status(403).json({message: "Erreur", cause: result});
-                }
-            }else{
-                res.status(403).json({message: "Erreur", cause: "L'utilisateur n'existe pas"});
-            }
-        } catch (error) {
-            console.log(error);
-            res.status(500).json({error: "Une erreur est survenue durant la modification de l'utilisateur."});
-        }
-    }
+    }*/
 }
 
 module.exports = UserController;
