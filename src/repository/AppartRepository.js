@@ -1,5 +1,6 @@
+const mysql = require("mysql2");
 const DatabaseConnection = require("./Database");
-const appartModel= require("../model/Appart");
+const appartModel = require("../model/Appart");
 
 class AppartRepository {
     db;
@@ -17,11 +18,22 @@ class AppartRepository {
         });
     }
 
-    getAppartById(id) {
-        return new Promise((resolve, reject) => {
-            this.db.query("SELECT * FROM apparts WHERE id = ?", [id], (error, result) => {
+    getAllOnlineApparts() {
+        return new Promise ((resolve, reject) => {
+            this.db.query("SELECT * FROM apparts WHERE status = 'dispo'", (error, results) => {
                 if (error) reject(error);
-                resolve(result[0]);
+                resolve(results);
+            });
+        });
+    }
+
+    getAppartById(id) {
+        const sqlQuery = "SELECT id,owner,title,address,status,price,area,nb_rooms,max_people," +
+        "DATE_FORMAT(startDate, '%Y-%m-%d %H:%i:%s') as startDate, DATE_FORMAT(endDate, '%Y-%m-%d %H:%i:%s') as endDate FROM apparts WHERE id = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [id], (error, result) => {
+                if (error) reject(error);
+                resolve(result);
             });
         });
     }
@@ -96,25 +108,38 @@ class AppartRepository {
         });
     }
 
-    async delAppart(id, idOwner){
+    async getSpecByAppart(appartId){
+        const sql = "SELECT * FROM specApparts WHERE appartId = ?";
         return new Promise ((resolve, reject) => {
-            this.db.query("DELETE FROM apparts WHERE id = ? AND owner = ?", [id, idOwner], (error, results) => {
-                if(error) reject(error);
+            this.db.query(sql, [appartId], (error, results) => {
+                if (error) reject(error);
                 resolve(results);
-            })
-        })
+            });
+        });
     }
 
-    async editAppart(appartId, data) {
-        let sqlQuery = "UPDATE apparts set ";
-        for (const key in data) sqlQuery += `${key} = ? `;
-        sqlQuery+= "WHERE id = ?";
-        return new Promise ((resolve, reject) => {
-            this.db.query(sqlQuery, [Object.values(data), appartId], (error, results) => {
-                if(error) reject(error);
+    async patchSpecByAppart(appartId, data){
+        const keys = Object.keys(data);
+        let sqlQuery = "UPDATE specApparts set appartId = appartId ";
+        for (const key in keys) sqlQuery += `, ${keys[key]} = ?`;
+        sqlQuery+= " WHERE appartId = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [...Object.values(data), appartId], (error, results) => {
+                if (error) reject(error);
                 resolve(results);
-            })
-        })
+            });
+        });
+    }
+
+    async getReservDatesOfAppart(appartId) {
+        const sqlQuery = "SELECT DATE_FORMAT(startDate, '%Y-%m-%d %H:%i:%s') as reservationStart," +
+        "DATE_FORMAT(endDate, '%Y-%m-%d %H:%i:%s') as reservationEnd FROM reservation WHERE appartId = ? AND status = 'BOOKED' ORDER BY startDate";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [appartId], (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
     }
 }
 
