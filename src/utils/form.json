@@ -14,5 +14,6 @@
     "getAppartsError": "Erreur durant la récupération des logements",
     "getAppartError": "Erreur durant la récupération du logement",
     "editAppartError": "Une erreur est survenue durant la modification du logement",
-    "appartInexistant": "Logement inexistant"
+    "appartInexistant": "Logement inexistant",
+    "unfoundOrNoPerms": "Inexistant ou droits insuffisants"
 }
