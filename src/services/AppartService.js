@@ -1,8 +1,10 @@
-const Appart            = require("../model/Appart");
-const AppartRepository  = require("../repository/AppartRepository");
-const baseUrl           = require("../../config.json").baseUrl;
-const UserRepository    = require("../repository/UserRepository");
-
+const Appart                = require("../model/Appart");
+const AppartRepository      = require("../repository/AppartRepository");
+const baseUrl               = require("../../config.json").baseUrl;
+const UserRepository        = require("../repository/UserRepository");
+const moment                = require("moment");
+const form                  = require("../utils/form.json");
+const ReservationRepository = require("../repository/ReservationRepository");
 
 class AppartService {
     repository;
@@ -10,21 +12,21 @@ class AppartService {
 
     constructor(){
         this.repository = new AppartRepository();
+        this.reservRepo = new ReservationRepository();
         this.userRepo = new UserRepository();
     }
 
     async getAllApparts() {
         try {
-            let apparts = await this.repository.getAllApparts();
+            let apparts = await this.repository.getAllOnlineApparts();
             for (const appart in apparts){
                 apparts[appart].specs = `${baseUrl}/apparts/${apparts[appart].id}/specs`;
-                apparts[appart].lien = `${baseUrl}/apparts/${apparts[appart].id}`;
-
+                apparts[appart].link = `${baseUrl}/apparts/${apparts[appart].id}`;
             }
             return apparts;
         } catch (error) {
             console.log("Une erreur est survenue lors de la recupération des logements : ", error);
-            return "error";
+            return false;
         }
     }
 
@@ -112,7 +114,7 @@ class AppartService {
                 const resDb = await this.repository.editAppart(appartId, newData);
                 if (resDb.affectedRows > 0) return {message: "Logement édité", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
             }
-            return "Logement inexistant";
+            return appartInexistant;
         } catch (error) {
             console.log(error);
             return false;
@@ -200,6 +202,92 @@ class AppartService {
              return false;
          }
 
+    }
+
+    async getDatesOfAppart(appartId) {
+        try {
+            const appart = (await this.repository.getAppartById(appartId))[0];
+            if (appart && appart.id == appartId) {
+                const resDb = await this.repository.getReservDatesOfAppart(appartId);
+                const availability = {start: appart.startDate, end: appart.endDate};
+                const availableDates = this.getAvailableDateRanges(availability, resDb);
+                return {appartId: appartId, dates: availableDates};
+            } else {
+                return {error: form.appartInexistant};
+            }
+        } catch (error) {
+            console.log("Error at getDatesOfAppart : ", error);
+            return false;
+        }
+    }
+
+    async getAppartReservations(appartId, userId, isAdmin) {
+        try {
+            const appart = (await this.repository.getAppartById(appartId))[0];
+            if (appart && appart.id == appartId && (appart.owner === userId || isAdmin)) {
+                const reservations = await this.reservRepo.getReservationsByAppart(appartId);
+                return reservations;
+            } else {
+                return {error: form.unfoundOrNoPerms};
+            }
+        } catch (error) {
+            console.log("Error at getAppartReservations : ", error);
+            return false;
+        }
+    }
+
+    getAvailableDates(availability, reservations) {
+        let availableDates = [];
+        let date = moment(availability.start);
+        let end = moment(availability.end);
+
+        // Tant qu'on a pas atteint la date finale, on ajoute une date dans le tableau
+        while (date.isSameOrBefore(end)) {
+            availableDates.push(date.format('YYYY-MM-DD'));
+            date.add(1, "days");
+        }
+
+        for (const reservation in reservations) {
+            const actualStart = reservations[reservation].reservationStart;
+            const actualEnd = reservations[reservation].reservationEnd;
+
+            // On renvoie un nouveau tableau filtré qui consiste
+            // à checker si la date actuelle fait partie d'une range de réservation afin de la retourner ou non
+            availableDates = availableDates.filter(actual => {
+                const actualDate = moment(actual);
+                if (actualDate.isBefore(actualStart) || actualDate.isAfter(actualEnd)) return actualDate;
+            });
+        }
+
+        return availableDates;
+    }
+
+    getAvailableDateRanges(availability, reservations) {
+        const availableDates = this.getAvailableDates(availability, reservations);
+        let ranges = [];
+
+        let actualRange = {startDate: availableDates[0], endDate: availableDates[0]};
+        for (let i = 1; i < availableDates.length; i++) {
+            const old = moment(availableDates[i-1], "YYYY-MM-DD");
+            const actual = moment(availableDates[i], "YYYY-MM-DD");
+            
+            // Si l'écart est supérieur à un jour, c'est qu'on est passé dans une nouvelle tranche
+            if (actual.diff(old, 'days') > 1) {
+                // Dans ce cas la date - 1 est la fin d'une ancienne tranche
+                actualRange.endDate = availableDates[i-1];
+                ranges.push(actualRange);
+                // On affecte la date actuelle comme début de nouvelle tranche
+                actualRange = {};
+                actualRange.startDate = availableDates[i];
+            } else {
+                actualRange.endDate = availableDates[i];
+            }
+        }
+
+        // Afin d'ajouter la dernière tranche
+        ranges.push(actualRange);
+
+        return ranges;
     }
 }
 

@@ -12,7 +12,7 @@ class ReservationRepository {
         const formattedStartDate = moment(startDate).format('YYYY-MM-DD');
         const formattedEndDate = moment(endDate).format('YYYY-MM-DD');
         return new Promise((resolve, reject) => {
-            this.db.query(`SELECT id FROM reservation WHERE appartId = ? AND ((startDate <= ? AND endDate > ?) OR (startDate > ? AND startDate <= ?) OR (endDate > ? AND endDate <= ?))`, 
+            this.db.query(`SELECT id FROM reservation WHERE status = 'BOOKED' AND appartId = ? AND ((startDate <= ? AND endDate > ?) OR (startDate > ? AND startDate <= ?) OR (endDate > ? AND endDate <= ?))`, 
 [appartId, formattedStartDate, formattedEndDate, formattedStartDate, formattedEndDate, formattedStartDate, formattedEndDate], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
@@ -62,6 +62,17 @@ class ReservationRepository {
         sqlQuery += " WHERE id = ?";
         return new Promise((resolve, reject) => {
             this.db.query(sqlQuery, Object.values(data), (error, results) => {
+                if (error) reject(error);
+                resolve(results);
+            });
+        });
+    }
+
+    async getReservationsByAppart(appartId) {
+        let sqlQuery = "SELECT id,clientId,appartId,DATE_FORMAT(startDate, '%Y-%m-%d %H:%i:%s') as startDate," +
+        "DATE_FORMAT(endDate, '%Y-%m-%d %H:%i:%s') as endDate, status FROM reservation WHERE appartId = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [appartId], (error, results) => {
                 if (error) reject(error);
                 resolve(results);
             });

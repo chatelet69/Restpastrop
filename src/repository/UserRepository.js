@@ -85,9 +85,9 @@ class UserRepository {
         let sqlQuery = "UPDATE users SET id = id";
         for (const key in data) sqlQuery += `, ${key} = ?`;
         sqlQuery+=" WHERE id = ?";
-        data.userId = userId;
         return new Promise((resolve, reject) => {
-            let test = this.db.query(sqlQuery, Object.values(data), (error, result) => {
+            // Combine le tableau de valeurs avec le userId
+            let test = this.db.query(sqlQuery, [...Object.values(data), userId], (error, result) => {
                 if (error) reject(error);
                 resolve(result);
             })

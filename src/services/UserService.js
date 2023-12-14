@@ -137,7 +137,7 @@ class UserService {
                 for (const key in data.body)
                     if (!authorized.includes(key)) return "Données éronnées";
 
-                if (data.azisAdmin || data.userId == userId) {
+                if (data.isAdmin || data.userId == userId) {
                     if (data.body.password) data.body.password = sha512(data.body.password);
                     const resDb = await this.userRepository.patchUserById(userId, data.body);
                     return (resDb.affectedRows) ? 
