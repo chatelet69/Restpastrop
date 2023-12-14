@@ -30,6 +30,10 @@ router.get("/apparts/:id/dates", [authMiddleware, authorizationMiddleware], (req
     appartControl.getDatesOfAppart(req, res);
 });
 
+router.get("/apparts/:id/reservations", [authMiddleware, authorizationMiddleware, checkIfAdmin], (req, res) => {
+    appartControl.getAppartReservations(req, res);
+});
+
 // Post method
 
 router.post("/apparts/create", [authMiddleware], async (req, res) =>{

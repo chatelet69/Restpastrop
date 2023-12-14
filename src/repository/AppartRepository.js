@@ -28,8 +28,10 @@ class AppartRepository {
     }
 
     getAppartById(id) {
+        const sqlQuery = "SELECT id,owner,title,address,status,price,area,nb_rooms,max_people," +
+        "DATE_FORMAT(startDate, '%Y-%m-%d %H:%i:%s') as startDate, DATE_FORMAT(endDate, '%Y-%m-%d %H:%i:%s') as endDate FROM apparts WHERE id = ?";
         return new Promise((resolve, reject) => {
-            this.db.query("SELECT * FROM apparts WHERE id = ?", [id], (error, result) => {
+            this.db.query(sqlQuery, [id], (error, result) => {
                 if (error) reject(error);
                 resolve(result);
             });
@@ -129,8 +131,9 @@ class AppartRepository {
         });
     }
 
-    async getDatesOfAppart(appartId) {
-        const sqlQuery = "SELECT startDate, endDate FROM reservation WHERE appartId = ?";
+    async getReservDatesOfAppart(appartId) {
+        const sqlQuery = "SELECT DATE_FORMAT(startDate, '%Y-%m-%d %H:%i:%s') as reservationStart," +
+        "DATE_FORMAT(endDate, '%Y-%m-%d %H:%i:%s') as reservationEnd FROM reservation WHERE appartId = ? AND status = 'BOOKED' ORDER BY startDate";
         return new Promise((resolve, reject) => {
             this.db.query(sqlQuery, [appartId], (error, results) => {
                 if (error) reject(error);

@@ -154,6 +154,20 @@ class AppartController{
             res.status(500).json({error: forms.getDatesAppartError});
         }
     }
+
+    async getAppartReservations(req, res) {
+        try {
+            const appartId = req.params.id;
+            const userId = req.user.userId;
+            const isAdmin = req.user.isAdmin;
+            let result = await this.service.getAppartReservations(appartId, userId, isAdmin);
+            if (result) res.status(200).json(result);
+            else res.status(500).json({error: forms.getReservationError});
+        } catch (error) {
+            console.log("Erreur controleur getAppartReservations : ", error);
+            res.status(500).json({error: forms.getReservationError});
+        }
+    }
 }
 
 module.exports = AppartController;
