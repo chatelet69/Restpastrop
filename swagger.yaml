@@ -1,0 +1,407 @@
+openapi: 3.0.0
+servers:
+  - description: API principale
+    url: https://larche.ovh
+info:
+  description: API d'application de réservation de logements
+  version: "1.0.0"
+  title: L'Arche Api
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+paths:
+  /login:
+    post:
+      tags:
+        - "Utilisateurs et Authentification"
+      summary:
+        Permet de se connecter et de générer un JWT
+      description: "Grâce aux données envoyées, connecte l'utilisateur et lui génère un JWT"
+      requestBody:
+        description: Pseudo et mot de passe
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/login'
+      
+      responses:
+        "200":
+          description: "Connecté"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "success", jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}
+        "403":
+          description: "Connection échouée"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Connection échouée"}
+  /register:
+    post: 
+      tags:
+        - "Utilisateurs et Authentification"
+      summary: "Permet de s'inscrire"
+      description: Grâce aux données envoyées, inscrit l'utilisateur et lui génère un JWT par la même occasion
+      requestBody:
+        description: Pseudo, mot de passe, email, nom, prénom
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/register'
+      
+      responses:
+        "200":
+          description: "Inscrit"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "success", jwt: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"}
+        "403":
+          description: "Inscription échouée, Données envoyées incorrectes"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Inscription échouée"}
+  /me:
+    get:
+      summary: Profil de l'utilisateur
+      description: Renvoit le profil de l'utilisateur connecté
+      tags:
+        - "Utilisateurs et Authentification"
+      security:
+        - jwtAuth: [admin]
+        - authJwt: [admin]
+        - jwtAuth:
+            - read
+            - write
+      responses:
+        "200":
+          description: "Affichage de l'utilisateur"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "logged", user: {"id": 1,"username": "john01","name": "John","lastname": "Doe","rank": "user","email": "john.doe@mail.com"}}
+        "403":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Vous n'êtes pas autorisé à appeler l'API."}
+  /users/:id:
+    get:
+      tags:
+        - Administration
+      responses:
+        "200":
+          description: Renvoit le profil d'un utilisateur
+  /apparts:
+    get:
+      tags:
+        - Appartements
+      summary: Permet de récupérer tous les appartements.
+      description: Aucun paramètres à mettre ni besoin d'être login.
+      responses:
+        '200':
+          description: Appartements récupérés
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAllApparts'
+        '400':
+          description: Erreur lors de la récupération des logements
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur lors de la récupération des appartements"}
+        "403":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Vous n'êtes pas autorisé à appeler l'API."}
+    post:
+      tags:
+        - Appartements
+      summary: Créer un appartement
+      description: Permet à un utilisateur de faire une demande pour publier son logement sur la plateforme, doit être validé par un admin pour que le logement soit visible et pour que l'utilisateur ai le grade owner
+      parameters:
+        - in: query
+          name: searchString
+          description: pass an optional search string for looking up inventory
+          required: false
+          schema:
+            type: string
+        - in: query
+          name: skip
+          description: number of records to skip for pagination
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+        - in: query
+          name: limit
+          description: maximum number of records to return
+          schema:
+            type: integer
+            format: int32
+            minimum: 0
+            maximum: 50
+      responses:
+        '201':
+          description: Demande de création de location envoyée
+          content:
+            application/json:
+              schema: 
+                type: object
+                example: {"message": "success", "info" :{"lien":"https://larche.ovh/apparts/:id", "method": "GET"}}
+        '400':
+          description: paramètres incorrectes
+          content:
+            application/json:
+              schema: 
+                type: object
+                example: {"error": "Une erreur est survenue lors de la création de l'appartement"}
+        '500':
+          description: paramètres incorrectes
+          content:
+            application/json:
+              schema: 
+                type: object
+                example: {"error": "Une erreur est survenue lors de la création du logement"}
+
+    delete:
+      tags:
+        - Appartements
+      summary: Supprimer un appartement
+      description: Suppression physique d'un appartements.
+      parameters:
+        - 
+      
+  /apparts/search/by?params=value:
+    get:
+      tags:
+        - Appartements
+      summary: Permet de récupérer des appartements en fonction de certains paramètres.
+      description: tous les paramètres des appartements peuvent être renseignés.
+      responses:
+        '200':
+          description: Appartements récupérés
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAppartsByParams'
+        '400':
+          description: Erreur lors de la récupération des logements
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur lors de la récupération des appartements"}
+        "403":
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Vous n'êtes pas autorisé à appeler l'API."}
+  /reservation:
+    post: 
+      tags: 
+        - Reservation
+      summary: Créer une réservation
+      description: Permet à un utilisateur de réserver un appartement entre deux dates spécifiées
+      responses : 
+        '200':
+          description: ""
+          content:
+            application/json:
+              schema:
+              type:
+              example:
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+              type: object
+              example: {"error": "Une erreur est survenue durant la création de la réservation"}
+  
+
+
+
+components:
+  securitySchemes:
+    authJwt: 
+      type: http
+      scheme: jwt
+    jwtAuth:
+      type: apiKey
+      in: header
+      name: Authorization
+  schemas:
+    login:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "john"
+        password: 
+          type: string
+          example: J0hnP4ssw0r1d
+    register:
+      type: object
+      required:
+        - username
+        - email
+        - password
+        - name
+        - lastname
+      properties:
+        username:
+          type: string
+          example: "john"
+        password:
+          type: string
+          example: "azeeakeKZPEKAElr!"
+        name:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Doe"
+        email:
+          type: string
+          example: "john.doe@mail.com"
+    
+    
+    getAllApparts:
+      type: object
+      required:
+        - count
+        - apparts
+          - appart
+      properties:
+        count:
+          type: integer
+          example: 2
+        apparts:
+          type: array
+          items: 
+              oneOf:
+                - $ref: '#/components/schemas/getAppart'
+                - $ref: '#/components/schemas/getAppart'
+
+    getAppartsByParams:
+          type: object
+          required:
+            - apparts
+              - appart
+          properties:
+            apparts:
+              type: array
+              items: 
+                  oneOf:
+                    - $ref: '#/components/schemas/getAppart'
+                    - $ref: '#/components/schemas/getAppart'
+          
+    getAppart:
+      type: object
+      required:
+        - id
+        - owner
+        - title
+        - address
+        - status
+        - price
+        - area
+        - nb_rooms
+        - max_people
+        - spec
+        - link
+      properties:
+        id:
+          type: integer
+          example: 1
+        owner:
+          type: integer
+          example: 2
+        title:
+          type: string
+          example: Bel appartement parisien
+        address:
+          type: string
+          example: quoicoucaca au sucre
+        status:
+          type: string
+          example: en attente
+        price:
+          type: integer
+          example: 147
+        area:
+          type: integer
+          example: 99
+        nb_rooms:
+          type: integer
+          example: 3
+        max_people:
+          type: integer
+          example: 4
+        spec:
+          $ref: '#/components/schemas/spec'
+        link:
+          $ref: '#/components/schemas/link'
+    
+    spec:
+      type: object
+      required:
+        - idAppart
+        - wifi
+        - parking
+        - childAdapted
+        - balcon
+        - smoker
+      properties:
+        idAppart:
+          type: integer
+          example: 1
+        wifi:
+          type: integer
+          example: 0
+        parking:
+          type: integer
+          example: 1
+        childAdapted:
+          type: integer
+          example: 1
+        balcon:
+          type: integer
+          example: 0
+        smoker:
+          type: integer
+          example: 1
+    link:
+      type: object
+      required:
+        - link
+        - method
+      properties:
+        link:
+          type: string
+          example: 'https://larche.ovh/apparts/:id'
+        method:
+          type: string
+          example: GET

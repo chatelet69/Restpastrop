@@ -39,13 +39,14 @@ class AppartController{
             const area = req.body.area;
             const nb_rooms = req.body.nb_rooms;
             const max_people = req.body.max_people;
-
+            const startDate = req.body.startDate;
+            const endDate = req.body.endDate;
             const userRank = req.user.rank;
             const userId = req.user.userId;
 
-            let result = await this.service.createAppart(owner, title, address, status, price, area, nb_rooms, max_people, userRank, userId);
-            if (!isNaN(result[0].id)) res.status(200).json({message: "success", info: {lien: `${baseURL}/apparts/${result[0].id}`,method: "GET"}});
-            else res.status(500).json({error: result});
+            let result = await this.service.createAppart(owner, title, address, status, price, area, nb_rooms, max_people, userRank, userId, startDate, endDate);
+            if (result[0].id) res.status(201).json({message: "success", info: {lien: `${baseURL}/apparts/${result[0].id}`,method: "GET"}});
+            else res.status(400).json({error: "Une erreur est survenue lors de la création de l'appartement"});
         } catch (error) {
             console.log(error);
             res.status(500).json({error: "Erreur durant la création du logement"});

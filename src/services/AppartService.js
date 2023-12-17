@@ -41,7 +41,7 @@ class AppartService {
         }
     }
 
-    async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people, userRank, userId) {
+    async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people, userRank, userId, startDate, endDate) {
         
         if (typeof title === 'string' && typeof address === 'string') {
             if(!idOwner) idOwner = userId;
@@ -49,26 +49,26 @@ class AppartService {
                 status = "dispo";
             }else{
                 status = "en attente"
-                if(idOwner != userId) return "Vous ne pouvez pas créer un appartement au nom d'un autre.";
+                if(idOwner != userId) return false
             }
             if (!isNaN(idOwner) && !isNaN(price) && !isNaN(area) && !isNaN(nb_rooms) && !isNaN(max_people)) {
                 
                 if (idOwner>0) {
                     let results = await this.repository.createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people);
                     if (!results) {
-                        return "Une erreur est survenue lors de la création de l'appartement";
+                        return false;
                     }else{
                         if(idOwner != userId && await this.userRepo.getRankById(idOwner) == "user") await this.userRepo.changeRankById("owner", idOwner); 
                         return results;
                     }
                 }else{
-                    return "Id invalide";
+                    return false;
                 }
             }else{
-                return "Une erreur est survenue lors de la création de l'appartement, certaines variables ont un mauvais type";
+                return false;
             }
         }else{
-            return "Une erreur est survenue lors de la création de l'appartement, certaines variables ont un mauvais type";
+            return false;
         }
     }
 
