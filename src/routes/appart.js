@@ -6,6 +6,7 @@ const authMiddleware            = require("../middlewares/authMiddleware");
 const authorizationMiddleware   = require("../middlewares/authorizationMiddleware");
 const authAdminMiddleware       = require("../middlewares/authAdminMiddleware");
 const checkIfAdmin              = require("../middlewares/checkIfAdmin");
+const dateTimeMiddleware        = require("../middlewares/dateTimeMiddleware");
 const appartControl             = new AppartController();
 
 // Get method
@@ -36,7 +37,7 @@ router.get("/apparts/:id/reservations", [authMiddleware, authorizationMiddleware
 
 // Post method
 
-router.post("/apparts/create", [authMiddleware], async (req, res) =>{
+router.post("/apparts/create", [authMiddleware, dateTimeMiddleware], async (req, res) =>{
     await appartControl.postAppart(req, res);
 });
 
@@ -48,7 +49,7 @@ router.delete("/apparts/:id",[authMiddleware], async (req, res) => {
 
 // Patch Method
 
-router.patch("/apparts/:id", [authMiddleware, checkIfAdmin], (req, res) => {
+router.patch("/apparts/:id", [authMiddleware, checkIfAdmin, dateTimeMiddleware], (req, res) => {
     appartControl.editAppart(req, res);
 });
 
