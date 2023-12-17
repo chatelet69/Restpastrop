@@ -80,8 +80,11 @@ class AppartController{
             const data = req.body;
             const isAdmin = req.user.isAdmin;
             let resEdit = await this.service.editAppart(userId, appartId, data, isAdmin);
-            if (resEdit) res.status(200).json({message: resEdit});
-            else res.status(400).json({message: "Une erreur est survenue durant la requête"});
+            if(resEdit=="Permission refusée"){
+                res.status(403).json({error: resEdit})
+            }else if(resEdit){
+                res.status(200).json({message: resEdit})
+            }else res.status(400).json({message: "Une erreur est survenue durant la requête"});
         } catch (error) {
             console.log("Erreur editAppart : ", error);
             res.status(500).json({error: forms.editAppartError});
@@ -92,8 +95,8 @@ class AppartController{
         try {
             const appartId = req.params.id;
             let resValid = await this.service.validAppart(appartId);
-            if (resValid == "ok") res.status(200).json({message: "Logement validé !"});
-            else res.status(400).json({message: resValid});
+            if (resValid) res.status(200).json({resValid});
+            else res.status(400).json({error: "Vous ne pouvez pas valider ce logement."});
         } catch (error) {
             console.log(error);
             res.status(500).json({error: `Une erreur est survenue durant la validation du logement ${req.params.id}`});

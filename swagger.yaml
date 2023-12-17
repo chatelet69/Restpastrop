@@ -9,6 +9,15 @@ info:
   license:
     name: Apache 2.0
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+tags:
+  - name: Utilisateurs et Authentification
+    description: Section liée aux routes utilisateurs
+  - name: Administration
+    description: Section réservée aux administrateurs
+  - name: Appartements
+    description: Section liée aux routes appartements
+  - name : Reservation
+    description: Section liée aux routes reservations
 paths:
   /login:
     post:
@@ -96,13 +105,55 @@ paths:
               schema:
                 type: object
                 example: {"error": "Vous n'êtes pas autorisé à appeler l'API."}
-  /users/:id:
+  /users:
     get:
+      summary: Récupérer les utilisateurs
+      description: Renvoie la liste des utilisateurs (Nécessite d'être admin)
       tags:
         - Administration
+      security:
+        - jwtAuth:
+            - read
+            - write
+      responses:
+        "200":
+          description: Renvoit la liste des utilisateurs
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "500":
+          description: Erreur interne
+  /users/{id}:
+    get:
+      summary: Récupérer un utilisateur
+      description: Renvoit le profil d'un utilisateur identifié par son ID
+      tags:
+        - Administration
+      security:
+        - jwtAuth:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Numeric ID of the user to get
       responses:
         "200":
           description: Renvoit le profil d'un utilisateur
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        "500":
+          description: Erreur interne
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorGetUser'
   /apparts:
     get:
       tags:
@@ -135,28 +186,13 @@ paths:
         - Appartements
       summary: Créer un appartement
       description: Permet à un utilisateur de faire une demande pour publier son logement sur la plateforme, doit être validé par un admin pour que le logement soit visible et pour que l'utilisateur ai le grade owner
-      parameters:
-        - in: query
-          name: searchString
-          description: pass an optional search string for looking up inventory
-          required: false
-          schema:
-            type: string
-        - in: query
-          name: skip
-          description: number of records to skip for pagination
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-        - in: query
-          name: limit
-          description: maximum number of records to return
-          schema:
-            type: integer
-            format: int32
-            minimum: 0
-            maximum: 50
+      requestBody:
+        description: owner, title, address, status, price, area, nb_rooms, max_people, startDate, endDate
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/createAppart'
       responses:
         '201':
           description: Demande de création de location envoyée
@@ -173,21 +209,107 @@ paths:
                 type: object
                 example: {"error": "Une erreur est survenue lors de la création de l'appartement"}
         '500':
-          description: paramètres incorrectes
+          description: paramètres manquants
           content:
             application/json:
               schema: 
                 type: object
                 example: {"error": "Une erreur est survenue lors de la création du logement"}
-
+  /apparts/{id}:              
     delete:
       tags:
         - Appartements
       summary: Supprimer un appartement
       description: Suppression physique d'un appartements.
       parameters:
-        - 
-      
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      responses:
+        '200':
+          description: Suppression réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "Logement supprimé"}
+        '403':
+          description: Vous n'êtes pas le propriètaire
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Vous n'êtes pas le propriétaire de cet appartement"}
+    patch:
+      tags:
+        - Appartement
+      summary: Editer un paramètre d'un appartement
+      description: Mettre dans le body les paramètres à modifier
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      responses:
+        '200':
+          description: Suppression réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": {"message": "Logement édité","info": {"lien": "http://larche.ovh/apparts/29","method": "GET"}}}
+        '403':
+          description: Permission refusée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Permission refusée"}
+
+  /apparts/validate/{id}:
+    patch:
+      tags:
+        - Appartements
+      summary: Valider un appartement
+      description: Passe le status de "en attente" à "dispo".
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      responses:
+        '200':
+          description: Appartement édité
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": {"message": "Logement validé","info": {"lien": "http://larche.ovh/apparts/36","method": "GET"}}}
+        '403':
+          description: Vous n'êtes pas administrateur
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Vous n'avez pas les droits nécessaires"}
+        '500':
+          description: Une erreur est survenue
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Une erreur est survenue durant la validation du logement"}
+
   /apparts/search/by?params=value:
     get:
       tags:
@@ -209,7 +331,7 @@ paths:
                 type: object
                 example: {"error": "Erreur lors de la récupération des appartements"}
         "403":
-          description: ""
+          description: "Pas d'autorisation à utiliser l'API"
           content:
             application/json:
               schema:
@@ -221,21 +343,70 @@ paths:
         - Reservation
       summary: Créer une réservation
       description: Permet à un utilisateur de réserver un appartement entre deux dates spécifiées
+      requestBody:
+        description: clientId, appartId, startDate, endDate, status
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/reservation'
       responses : 
         '200':
-          description: ""
+          description: Réservation éffectuée
           content:
             application/json:
               schema:
-              type:
-              example:
+                type: object
+                example: {"message": "Logement réservé", "viewReservation:": {"lien": "https://larche.ovh/reservation/2","method": "GET"}}
+        '400':
+          description: Données manquantes ou valeurs fausses
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Date manquante ou non identifiée"}
         '500':
           description: ""
           content:
             application/json:
               schema:
-              type: object
-              example: {"error": "Une erreur est survenue durant la création de la réservation"}
+                type: object
+                example: {"error": "Une erreur est survenue durant la création de la réservation"}
+  /reservation/{id}:
+    get: 
+      tags: 
+        - Reservation
+      summary: "Récupérer une réservation"
+      description: Permet à un utilisateur de récupérer une reservation 
+      #requestBody:
+      #  description: "clientId, appartId, startDate, endDate, status"
+      #  required: true
+      #  content:
+      #    application/x-www-form-urlencoded:
+      #      schema:
+      #        $ref: '#/components/schemas/reservation'
+      responses : 
+        '200':
+          description: Réservation éffectuée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "Logement réservé", "viewReservation:": {"lien": "https://larche.ovh/reservation/2","method": "GET"}}
+        '400':
+          description: Données manquantes ou valeurs fausses
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Date manquante ou non identifiée"}
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Une erreur est survenue durant la création de la réservation"}
   
 
 
@@ -250,6 +421,42 @@ components:
       in: header
       name: Authorization
   schemas:
+    errorGetUser:
+      type: object
+      properties:
+        error:
+          type: string
+          example: "Une erreur est survenue durant la récupération du user"
+    user:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        username: 
+          type: string
+          example: "john01"
+        name:
+          type: string
+          example: "John"
+        lastname:
+          type: string
+          example: "Doe"
+        rank:
+          type: string
+          example: "user"
+        email:
+          type: string
+          example: "john.doe@gmail.com"
+    users:
+      type: object
+      properties:
+        users:
+          type: array
+          items:
+            oneOf:
+              - $ref: '#/components/schemas/user'
+              - $ref: '#/components/schemas/user'
     login:
       type: object
       required:
@@ -286,8 +493,75 @@ components:
         email:
           type: string
           example: "john.doe@mail.com"
-    
-    
+    createAppart:
+      type: object
+      required:
+        - owner
+        - title
+        - address
+        - status
+        - price
+        - area
+        - nb_rooms
+        - max_people
+        - startDate
+        - endDate        
+      properties:
+        owner:
+          type: integer
+          example: 1
+        title: 
+          type: string
+          example: Appartement parisien
+        address:
+          type: string
+          example: "12 rue de ..."
+        status: 
+          type: string
+          example: "en attente"
+        price:
+          type: integer
+          example: 172 181
+        area: 
+          type: integer
+          example: 127
+        nb_rooms:
+          type: integer
+          example: 4
+        max_people: 
+          type: integer
+          example: 4
+        startDate:
+          type: string
+          example: "2024-03-15 00:00:00"
+        endDate: 
+          type: string
+          example: "2024-03-15 00:00:00"
+    reservation:
+      type: object
+      required:
+        - clientId
+        - appartId
+        - startDate
+        - endDate
+        - status
+      properties:
+        clientId:
+          type: integer
+          example: 6
+        appartId: 
+          type: integer
+          example: 1
+        startDate: 
+          type: string
+          example: "2024-01-08 00:00:00"
+        endDate: 
+          type: string
+          example: "2024-05-08 00:00:00"
+        status: 
+          type: string
+          example: BOOKED
+
     getAllApparts:
       type: object
       required:

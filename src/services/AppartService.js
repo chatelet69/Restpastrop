@@ -51,6 +51,9 @@ class AppartService {
                 status = "en attente"
                 if(idOwner != userId) return false
             }
+            if(!startDate || !endDate){
+                return false;
+            }
             if (!isNaN(idOwner) && !isNaN(price) && !isNaN(area) && !isNaN(nb_rooms) && !isNaN(max_people)) {
                 
                 if (idOwner>0) {
@@ -136,16 +139,16 @@ class AppartService {
                     if (resOwner.affectedRows>0) {
                         return {message: "Logement validé", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
                     }else{
-                        return "Erreur, le rôle du propriétaire n'a pas été modifié";
+                        return false;
                     }
                 }else{
-                    return "Aucun logements n'a été validé";
+                    return false;
                 }
             }else{
-                return "Logement déjà validé";
+                return false;
             }
         }else{
-            return "Merci de préciser l'id.";
+            return false;
         }
     }
 
