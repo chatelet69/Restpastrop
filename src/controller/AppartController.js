@@ -44,7 +44,7 @@ class AppartController{
             const userId = req.user.userId;
 
             let result = await this.service.createAppart(owner, title, address, status, price, area, nb_rooms, max_people, userRank, userId);
-            if (result) res.status(200).json({message: "success", info: {lien: `${baseURL}/apparts/${result[0].id}`,method: "GET"}});
+            if (!isNaN(result[0].id)) res.status(200).json({message: "success", info: {lien: `${baseURL}/apparts/${result[0].id}`,method: "GET"}});
             else res.status(500).json({error: result});
         } catch (error) {
             console.log(error);
