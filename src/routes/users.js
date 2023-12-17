@@ -4,7 +4,6 @@ const UserController            = require("../controller/UserController");
 const authMiddleware            = require("../middlewares/authMiddleware");
 const authorizationMiddleware   = require("../middlewares/authorizationMiddleware");
 const authAdminMiddleware       = require("../middlewares/authAdminMiddleware");
-const cacheMiddleware           = require("../middlewares/cacheMiddleware");
 const getMethodCheck            = require("../middlewares/getMethodCheck");
 const checkIfAdmin              = require("../middlewares/checkIfAdmin");
 const userController            = new UserController();

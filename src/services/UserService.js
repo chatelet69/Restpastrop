@@ -4,8 +4,7 @@ const sha512                = require('js-sha512');
 const jwt                   = require("jsonwebtoken");
 const secret                = require("../../config.json").secretJwt;
 const baseUrl               = require("../../config.json").baseUrl;
-const authorizedKeysUser    = require("../utils/form.json").authorizedKeysUser;
-const requiredRegisterKeys  = require("../utils/form.json").requiredRegisterKeys;
+const form                  = require("../utils/form.json");
 const UtilService           = require("./UtilService");
 const utilService           = new UtilService();
 
@@ -57,7 +56,7 @@ class UserService {
             let userData = false;
             userData = await this.userRepository.getUserById(userId);
             if (userData) return userData;
-            return false;
+            return {error: form.userNotFound};
         } catch (error) {
             console.log(error);
             return false;
@@ -67,7 +66,7 @@ class UserService {
     async registerService(registerData) {
         try {
             let returnVal = false;
-            if (utilService.checkKeysInData(registerData, requiredRegisterKeys, requiredRegisterKeys)) {
+            if (utilService.checkKeysInData(registerData, form.requiredRegisterKeys, form.requiredRegisterKeys)) {
                 registerData.password = sha512(registerData.password);
                 const resDb = await this.userRepository.createUser(registerData);
                 if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
@@ -82,13 +81,13 @@ class UserService {
     async createUser(userData) {
         try {
             const required = ["username", "password"];
-            if (utilService.checkKeysInData(userData, required, authorizedKeysUser)) {
+            if (utilService.checkKeysInData(userData, required, form.authorizedKeysUser)) {
                 userData.password = sha512(userData.password);
                 const resDb = await this.userRepository.createUser(userData);
                 if (resDb.affectedRows) return {message: "Utilisateur créée"};
                 else return false;
             } else {
-                return {error: "Données manquantes ou erronées"};
+                return {error: form.missingOrBadData};
             }
         } catch (error) {
             console.log(error);
@@ -99,10 +98,12 @@ class UserService {
     async search(data) {
         try {
             let returnVal = false;
-            const resDb = await this.userRepository.search(data);
-            if (resDb) {
-                returnVal = resDb;
-                for (const user in returnVal) returnVal[user].infos = `${baseUrl}/users/${returnVal[user].id}`;
+            if (this.checkKeysInData(data, null, form.authorizedKeysSearchUser)) {
+                const resDb = await this.userRepository.search(data);
+                if (resDb) {
+                    returnVal = resDb;
+                    for (const user in returnVal) returnVal[user].infos = `${baseUrl}/users/${returnVal[user].id}`;
+                }
             }
             return returnVal;
         } catch (error) {
@@ -135,7 +136,7 @@ class UserService {
             if (bodySize) {
                 let authorized = ["username", "email", "name", "lastname", "password", "rank"];
                 for (const key in data.body)
-                    if (!authorized.includes(key)) return "Données éronnées";
+                    if (!authorized.includes(key)) return form.missingOrBadData;
 
                 if (data.isAdmin || data.userId == userId) {
                     if (data.body.password) data.body.password = sha512(data.body.password);
@@ -146,7 +147,7 @@ class UserService {
                     return "Vous n'êtes pas habilité à faire cette action.";
                 }
             } else {
-                return "le corps de données est vide";
+                return form.missingOrBadData;
             }
         } catch (error) {
             console.log(error);
