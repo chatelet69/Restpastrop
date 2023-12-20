@@ -16,7 +16,9 @@ class ReservationService {
 
     async bookAppart(data) {
         try {
-            for (const key in data) if (data[key] === undefined) return {error: "Date manquante ou non identifiée"};
+            if (data.startDate === undefined || data.endDate === undefined){
+                return {error: "Date manquante ou non identifiée"};
+            }
             
             const checkdates = utilService.checkDatesPast(data.startDate, data.endDate);
             if (checkdates !== "ok") return checkdates;
@@ -25,7 +27,7 @@ class ReservationService {
             if (result.isAvailable) {
                 const res = await this.appartRepository.getAppartById(data.appartId);
                 if (res == 0) {
-                    return {message: "le logement n'existe pas"};
+                    return {error: "le logement n'existe pas"};
                 } else {
                     const booked = await this.reservationRepository.saveReservation(data);
                     if (booked.affectedRows) {          // Vérifie que l'insert a bien affectée une ligne
@@ -41,7 +43,7 @@ class ReservationService {
                     }
                 }
             } else {
-                return {message: "Cet appartement est déjà réservé."};
+                return {error: "Cet appartement est déjà réservé."};
             }
         } catch (error) {
             console.log(error);
