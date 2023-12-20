@@ -84,7 +84,7 @@ class UserService {
             if (utilService.checkKeysInData(userData, required, form.authorizedKeysUser)) {
                 userData.password = sha512(userData.password);
                 const resDb = await this.userRepository.createUser(userData);
-                if (resDb.affectedRows) return {message: "Utilisateur créée"};
+                if (resDb.affectedRows) return {message: "Utilisateur créé"};
                 else return false;
             } else {
                 return {error: form.missingOrBadData};

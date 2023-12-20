@@ -263,12 +263,12 @@ paths:
         $ref: '#/components/requestBodies/createUser'
       responses:
         "200":
-          description: Utilisateur créée
+          description: Utilisateur créé
           content:
             application/json:
               schema:
                 type: object
-                example: {message: "Utilisateur créée"}
+                example: {message: "Utilisateur créé"}
         "400":
           description: Requête possiblement mal formée
           content:
