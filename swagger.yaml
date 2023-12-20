@@ -377,38 +377,104 @@ paths:
       tags: 
         - Reservation
       summary: "Récupérer une réservation"
-      description: Permet à un utilisateur de récupérer une reservation 
-      #requestBody:
-      #  description: "clientId, appartId, startDate, endDate, status"
-      #  required: true
-      #  content:
-      #    application/x-www-form-urlencoded:
-      #      schema:
-      #        $ref: '#/components/schemas/reservation'
+      description: Permet à un utilisateur de récupérer une reservation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
       responses : 
         '200':
-          description: Réservation éffectuée
+          description: Récupération éffectuée
           content:
             application/json:
               schema:
                 type: object
-                example: {"message": "Logement réservé", "viewReservation:": {"lien": "https://larche.ovh/reservation/2","method": "GET"}}
-        '400':
-          description: Données manquantes ou valeurs fausses
-          content:
-            application/json:
-              schema:
-                type: object
-                example: {"error": "Date manquante ou non identifiée"}
+                example: {"id": 19,"clientId": 5,"appartId": 2,"startDate": "2024-02-01 00:00:00","endDate": "2024-02-06 00:00:00","status": "CANCELED"}
         '500':
           description: ""
           content:
             application/json:
               schema:
                 type: object
-                example: {"error": "Une erreur est survenue durant la création de la réservation"}
-  
+                example: {"error": "Erreur durant la récupération de la reservation"}
+    patch:
+      tags: 
+      - Reservation
+      summary: modification des dates de résarvation
+      description: Permet à un utilisateur de modifier la date de début ou la date de fin de la réservation
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      requestBody:
+        description: startDate, endDate
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/reservationPatch/'
+      responses:
+        '200':
+          description: Annulation de la réservation réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "Réservation modifiée","infos": { "link": "http://localhost:8081/reservation/10","method": "GET"}}
+        '500':
+          description: Annulation de la réservation réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Appartement non disponible"}
+  /reservation/cancel: 
+    patch:
+      tags:
+        - Reservation
+      summary: Modifier le status d'une reservation donnée
+      description: Mettre dans le body l'id de la réservation à modifier
+      requestBody:
+        description: idReservation
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/reservationCancel'
+      responses:
+        '200':
+          description: Annulation de la réservation réussie
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message" : "Reservation annulée", "info": {"link": "https://larche.ovh/reservation/19", "method": "GET"}}
+        '400':
+          description: Annulation de la réservation impossible car l'utilisateur n'a pas les droits
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Impossible d'annuler la réservation"}
+        '500': 
+          description: Annulation de la réservation impossible 
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur durant l'annulation de la réservation"}
+    
 
+
+
+  
 
 
 components:
@@ -561,6 +627,25 @@ components:
         status: 
           type: string
           example: BOOKED
+    reservationCancel:
+      type: object
+      required:
+        - idReservation
+      properties:
+        idReservation:
+          type: integer
+          example: 19
+    reservationPatch:
+      type: object
+      properties:
+        startDate: 
+          type: string
+          example: "2024-01-08 00:00:00"
+        endDate: 
+          type: string
+          example: "2024-05-08 00:00:00"
+
+
 
     getAllApparts:
       type: object
