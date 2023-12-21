@@ -27,6 +27,6 @@
     "appartInexistant": "Logement inexistant",
     "unfoundOrNoPerms": "Inexistant ou droits insuffisants",
     "missingOrBadData": "Données manquantes ou erronées",
-    "userNotFound": "Utilisateur(s) inexistant",
+    "userNotFound": "Utilisateur(s) inexistant(s)",
     "errorCreateUser": "Erreur durant la création de l'utilisateur"
 }
