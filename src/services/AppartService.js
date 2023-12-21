@@ -209,7 +209,6 @@ class AppartService {
             if (appart && appart.id == appartId) {
                 const resDb = await this.repository.getReservDatesOfAppart(appartId);
                 const availability = {start: appart.startDate, end: appart.endDate};
-                console.log(appart);
                 if (resDb.length == 0) return {appartId: appartId, dates: availability};
                 const availableDates = this.getAvailableDateRanges(availability, resDb);
                 return {appartId: appartId, dates: availableDates};
