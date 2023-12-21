@@ -155,7 +155,7 @@ class AppartService {
 
     async searchAppartBy(query){
         try {
-            let authorized = ["id","owner","title","address","status","price","area","nb_rooms","max_people"];
+            let authorized = ["id","owner","title","address","status","price","area","nb_rooms","max_people", "startDate", "endDate"];
             for(let key in query)
                 if(!authorized.includes(key)) return "Erreur, mauvais paramètres";
 
@@ -191,9 +191,18 @@ class AppartService {
             const ids = resultAppartUser.filter(item => item.id==appartId);
             if (ids != 0 || isAdmin) {
                 const result = await this.repository.patchSpecByAppart(appartId, data);
+                if (result.affectedRows != 0) {
+                    return {
+                        message : 'La modification a été modifié'
+                    }
+                }else{
+                    return {
+                        error :'La modification ne peut pas être effectuée'
+                    }
+                }
             }else {
                 return {
-                    message :'La modification ne peut pas être effectuée'
+                    error :'La modification ne peut pas être effectuée'
                 }
             }
          } catch (error){

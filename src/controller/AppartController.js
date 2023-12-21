@@ -139,8 +139,16 @@ class AppartController{
             const appartId = req.params.id;
             const isAdmin = req.user.isAdmin;
             const userId = req.user.userId;
+            console.log(data);
+            console.log(userId);
+            console.log(isAdmin);
             let result = await this.service.patchSpecByAppart(appartId, data, isAdmin, userId );
-            res.status(200).json(result);
+            if(result.error){
+                res.status(500).json(result);
+            }else{
+                res.status(200).json(result);
+            }
+            
         } catch (error) {
             console.log("Erreur controleur patchSpecsByAppart : ", error);
             res.status(500).json({error: `Erreur durant la modification des spécificités`});

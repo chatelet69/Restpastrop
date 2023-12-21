@@ -91,8 +91,6 @@ class ReservationService {
             if (idReservation) {
                 if (idReservation>0) {
                     let result = await this.reservationRepository.getReservationById(idReservation);
-                    console.log(result);
-                    console.log(isAdmin)
                     if (result) {
                         console.log("aaaaaaa")
                         let idOwner = result[0]['clientId'];

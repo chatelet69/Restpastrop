@@ -54,8 +54,8 @@ class UserController {
         try {
             const registerData = req.body;
             const resRegister = await userService.registerService(registerData);
-            if (resRegister) res.status(200).json({message: "success", jwt: resRegister});
-            else res.status(403).json({error: "Erreur durant l'inscription"});
+            if (resRegister && !resRegister.error) res.status(200).json({message: "success", jwt: resRegister});
+            else res.status(400).json({error: "Erreur durant l'inscription (Utilisateur existant ou mauvaises données)"});
         } catch (error) {
             console.log(error);
             res.status(500).json({error: "Une erreur est survenue durant l'inscription"});
@@ -92,12 +92,16 @@ class UserController {
     async deleteUser(req, res) {
         try {
             const userIdDelete = req.params.id;
-            const check = await userService.getUserService(userIdDelete);
-            if (check && check.id) {
-                userService.deleteUserById(userIdDelete);
-                res.status(200).json({message: "Suppression validée avec succès"});
+            if (userIdDelete == req.user.userId) {
+                res.status(400).json({error: "Vous ne pouvez pas vous supprimer"});
             } else {
-                res.status(404).json({error: form.userNotFound});
+                const check = await userService.getUserService(userIdDelete);
+                if (check && check.id) {
+                    userService.deleteUserById(userIdDelete);
+                    res.status(200).json({message: "Suppression validée avec succès"});
+                } else {
+                    res.status(404).json({error: form.userNotFound});
+                }
             }
         } catch (error) {
             console.log(error);
@@ -108,6 +112,7 @@ class UserController {
     async patchUser(req, res){
         try {
             const data = {
+                userIdReq: req.user.userId,
                 userId: req.params.id,
                 body: req.body,
                 isAdmin: req.user.isAdmin
@@ -116,7 +121,7 @@ class UserController {
             if (check.id) { // Check si l'user existe
                 let result = await userService.patchUserById(data.userId, data);
                 if (result.link) res.status(200).json({message: "Modification réalisée avec succès !", redirect: result});
-                else res.status(500).json({error: result});
+                else res.status(500).json({error: result.error});
             } else {
                 res.status(404).json({error: form.userNotFound});
             }

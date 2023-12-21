@@ -419,7 +419,42 @@ paths:
               schema: 
                 type: object
                 example: {"error": "Une erreur est survenue lors de la création du logement"}
-  /apparts/{id}:              
+  /apparts/{id}: 
+    get: 
+      tags: 
+        - Appartements
+      summary: Permet de récuperer un appartement
+      description: Permet de récupérer un appartement en passant un id dans le path
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      responses : 
+        '200':
+          description: Récupération éffectuée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"id": 1,"owner": 1, "title": "Appartement Paris 15ème", "address": "Paris", "status": "dispo", "price": 5000, "area": 70,"nb_rooms": 3,"max_people": 4,"startDate": "2023-12-20 17:15:30","endDate": "2024-12-20 17:15:30","specs": "http://localhost:8081/apparts/1/specs"}
+        '400':
+          description: Récupération du logement impossible
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error":  "Erreur durant la récupération du logement"}
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur durant la récupération du logement"}             
     delete:
       tags:
         - Appartements
@@ -450,7 +485,7 @@ paths:
                 example: {"error": "Vous n'êtes pas le propriétaire de cet appartement"}
     patch:
       tags:
-        - Appartement
+        - Appartements
       summary: Editer un paramètre d'un appartement
       description: Mettre dans le body les paramètres à modifier
       parameters:
@@ -513,6 +548,78 @@ paths:
               schema:
                 type: object
                 example: {"error": "Une erreur est survenue durant la validation du logement"}
+  /apparts/spec/{id}:
+    get:
+      tags:
+        - Appartements
+      summary: Permet de récupérer les spécificités d'un appartement
+      description: récupère les spécificités d'un appartement dont l'id est passé dans le path
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      responses : 
+        '200':
+          description: Récupération éffectuée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"appartId": 41,"wifi": 0,"parking": 0,"childAdapted": 0,"smoker": 0}
+        '404':
+          description: l'id n'est pas spécifié
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {error:"L'appartement n'a pas de spécificité"}
+        '500':
+          description: ""
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur durant la récupération des spécificités"}
+    patch:
+      tags: 
+      - Appartements
+      summary: Modifier les spécificités d'un appartement
+      description: Modifier les spécificités passés dans le body d'un appartement donnée dans le path
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: integer
+            items:
+              type: integer
+      requestBody:
+        description: wifi, parking, childAdapted, balcon, smoker
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/specs'
+      responses:
+        '200':
+          description: Récupération des spécificités
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message" : "La modification a été modifié"}
+        '500':
+          description: Impossibilité des spécificités
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur durant la modification des spécificités"}
+
+      
 
   /apparts/search/by:
     get:
@@ -623,7 +730,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/reservationPatch/'
+              $ref: '#/components/schemas/reservationPatch'
       responses:
         '200':
           description: Annulation de la réservation réussie
@@ -839,6 +946,7 @@ components:
         title: 
           type: string
           example: Appartement parisien
+        
         address:
           type: string
           example: "12 rue de ..."
@@ -860,9 +968,12 @@ components:
         startDate:
           type: string
           example: "2024-03-15 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         endDate: 
           type: string
           example: "2024-03-15 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
+          
     reservation:
       type: object
       required:
@@ -881,9 +992,11 @@ components:
         startDate: 
           type: string
           example: "2024-01-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         endDate: 
           type: string
           example: "2024-05-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         status: 
           type: string
           example: BOOKED
@@ -901,9 +1014,29 @@ components:
         startDate: 
           type: string
           example: "2024-01-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         endDate: 
           type: string
           example: "2024-05-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
+    spec:
+      type: object
+      properties:
+        wifi:
+          type: integer
+          example: 0
+        parking: 
+          type: integer
+          example: 1
+        childAdapted: 
+          type: integer
+          example: 0
+        balcon: 
+          type: integer
+          example: 0
+        smoker: 
+          type: integer
+          example: 1
 
 
 
@@ -983,8 +1116,7 @@ components:
           $ref: '#/components/schemas/spec'
         link:
           $ref: '#/components/schemas/link'
-    
-    spec:
+    specs:
       type: object
       required:
         - idAppart
