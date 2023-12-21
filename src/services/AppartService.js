@@ -155,7 +155,7 @@ class AppartService {
 
     async searchAppartBy(query){
         try {
-            let authorized = ["id","owner","title","address","status","price","area","nb_rooms","max_people"];
+            let authorized = ["id","owner","title","address","status","price","area","nb_rooms","max_people", "startDate", "endDate"];
             for(let key in query)
                 if(!authorized.includes(key)) return "Erreur, mauvais paramètres";
 
