@@ -2,6 +2,13 @@
     "usersKeysDb": [
         "username", "password", "name", "lastname", "email", "rank"
     ],
+    "defaultKeyUser": {
+        "name": "John",
+        "lastname": "Doe",
+        "email": "email@email.com",
+        "rank": "user",
+        "password": "null"
+    },
     "authorizedKeysUser": [
         "username", "password", "rank", "email", "name", "lastname"
     ],
@@ -20,6 +27,6 @@
     "appartInexistant": "Logement inexistant",
     "unfoundOrNoPerms": "Inexistant ou droits insuffisants",
     "missingOrBadData": "Données manquantes ou erronées",
-    "userNotFound": "Cet utilisateur n'existe pas",
+    "userNotFound": "Utilisateur(s) inexistant",
     "errorCreateUser": "Erreur durant la création de l'utilisateur"
 }

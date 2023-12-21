@@ -1,5 +1,6 @@
 const DatabaseConnection    = require("./Database");
 const userKeys              = require("../utils/form.json").usersKeysDb;
+const defaultKeyUser        = require("../utils/form.json").defaultKeyUser;
 
 class UserRepository {
     db;
@@ -51,7 +52,7 @@ class UserRepository {
 
     createUser(userData) {
         const sqlQuery = `INSERT INTO users (${userKeys}) VALUES (?,?,?,?,?,?)`;
-        for (const key in userKeys) if (userData[userKeys[key]] === undefined) userData[userKeys[key]] = "null";
+        for (const key in userKeys) if (userData[userKeys[key]] === undefined) userData[userKeys[key]] = defaultKeyUser[userKeys[key]];
         return new Promise((resolve, reject) => {
             this.db.execute(sqlQuery, Object.values(userData), (error, result) => {
                 if (error) throw (error);

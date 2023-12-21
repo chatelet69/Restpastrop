@@ -68,6 +68,7 @@ class UserService {
             let returnVal = false;
             if (utilService.checkKeysInData(registerData, form.requiredRegisterKeys, form.requiredRegisterKeys)) {
                 registerData.password = sha512(registerData.password);
+                registerData.rank = "user";
                 const resDb = await this.userRepository.createUser(registerData);
                 if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
             }
@@ -105,7 +106,7 @@ class UserService {
                     for (const user in returnVal) returnVal[user].infos = `${baseUrl}/users/${returnVal[user].id}`;
                 }
             }
-            return returnVal;
+            return (returnVal.length) ? returnVal : {message: form.userNotFound};
         } catch (error) {
             console.log(error);
             return false;
