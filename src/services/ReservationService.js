@@ -16,7 +16,9 @@ class ReservationService {
 
     async bookAppart(data) {
         try {
-            for (const key in data) if (data[key] === undefined) return {error: "Date manquante ou non identifiée"};
+            if (data.startDate === undefined || data.endDate === undefined){
+                return {error: "Date manquante ou non identifiée"};
+            }
             
             const checkdates = utilService.checkDatesPast(data.startDate, data.endDate);
             if (checkdates !== "ok") return checkdates;
@@ -25,7 +27,7 @@ class ReservationService {
             if (result.isAvailable) {
                 const res = await this.appartRepository.getAppartById(data.appartId);
                 if (res == 0) {
-                    return {message: "le logement n'existe pas"};
+                    return {error: "le logement n'existe pas"};
                 } else {
                     const booked = await this.reservationRepository.saveReservation(data);
                     if (booked.affectedRows) {          // Vérifie que l'insert a bien affectée une ligne
@@ -41,7 +43,7 @@ class ReservationService {
                     }
                 }
             } else {
-                return {message: "Cet appartement est déjà réservé."};
+                return {error: "Cet appartement est déjà réservé."};
             }
         } catch (error) {
             console.log(error);
@@ -76,10 +78,10 @@ class ReservationService {
                     if (result.affectedRows) return {message : "Reservation annulée", info: {link: `${baseUrl}/reservation/${idReservation}`, method: "GET"}};
                     else return {error: "Impossible d'annuler la réservation"};
                 } else {
-                    return {message : 'Annulation de la reservation impossible'};
+                    return {error : 'Annulation de la reservation impossible'};
                 }
             } else {
-                return {message : "Réservations déjà annulée"};
+                return {error : "Réservations déjà annulée"};
             }
         }
     }
@@ -89,12 +91,17 @@ class ReservationService {
             if (idReservation) {
                 if (idReservation>0) {
                     let result = await this.reservationRepository.getReservationById(idReservation);
-                    
+                    console.log(result);
+                    console.log(isAdmin)
                     if (result) {
+                        console.log("aaaaaaa")
                         let idOwner = result[0]['clientId'];
+                        console.log(idOwner)
                         if (idOwner == userId || isAdmin) {
+                            console.log("OK")
                             return result[0];
                         }else{
+                            console.log("KO")
                             return false;
                         }
                     }else{
