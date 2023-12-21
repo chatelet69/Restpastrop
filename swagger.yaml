@@ -450,7 +450,7 @@ paths:
                 example: {"error": "Vous n'êtes pas le propriétaire de cet appartement"}
     patch:
       tags:
-        - Appartement
+        - Appartements
       summary: Editer un paramètre d'un appartement
       description: Mettre dans le body les paramètres à modifier
       parameters:
@@ -623,7 +623,7 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: '#/components/schemas/reservationPatch/'
+              $ref: '#/components/schemas/reservationPatch'
       responses:
         '200':
           description: Annulation de la réservation réussie
@@ -860,9 +860,12 @@ components:
         startDate:
           type: string
           example: "2024-03-15 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         endDate: 
           type: string
           example: "2024-03-15 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
+          
     reservation:
       type: object
       required:
@@ -881,9 +884,11 @@ components:
         startDate: 
           type: string
           example: "2024-01-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         endDate: 
           type: string
           example: "2024-05-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         status: 
           type: string
           example: BOOKED
@@ -901,9 +906,11 @@ components:
         startDate: 
           type: string
           example: "2024-01-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
         endDate: 
           type: string
           example: "2024-05-08 00:00:00"
+          description: "YYYY-MM-DD hh:mm:ss"
 
 
 
