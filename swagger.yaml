@@ -548,7 +548,6 @@ paths:
               schema:
                 type: object
                 example: {"error": "Une erreur est survenue durant la validation du logement"}
-  
   /apparts/spec/{id}:
     get:
       tags:
