@@ -1,9 +1,16 @@
 class Appart {
-    constructor(id, title, ...any) {
+    constructor(id, title, owner, address, status, price, area, nb_rooms, max_people, startDate, endDate) {
         this.id = id;
         this.title = title;
-
-        for (const arg of any) this.arg = arg;
+        this.owner = owner;
+        this.address = address;
+        this.status = status;
+        this.price = price;
+        this.area = area;
+        this.nbRooms = nb_rooms;
+        this.maxPeople = max_people;
+        this.startDate = startDate;
+        this.endDate = endDate;
     };
 
     // Getters
