@@ -460,6 +460,10 @@ paths:
         - Appartements
       summary: Supprimer un appartement
       description: Suppression physique d'un appartements.
+      security:
+        - jwtAuth:
+          - read
+          - write
       parameters:
         - in: path
           name: id
@@ -518,6 +522,10 @@ paths:
         - Appartements
       summary: Valider un appartement
       description: Passe le status de "en attente" à "dispo".
+      security:
+        - jwtAuth:
+          - read
+          - write
       parameters:
         - in: path
           name: id
@@ -554,6 +562,10 @@ paths:
         - Appartements
       summary: Permet de récupérer les spécificités d'un appartement
       description: récupère les spécificités d'un appartement dont l'id est passé dans le path
+      security:
+        - jwtAuth:
+          - read
+          - write
       parameters:
         - in: path
           name: id
@@ -618,9 +630,6 @@ paths:
               schema:
                 type: object
                 example: {"error": "Erreur durant la modification des spécificités"}
-
-      
-
   /apparts/search/by:
     get:
       tags:
@@ -654,6 +663,10 @@ paths:
         - Reservation
       summary: Créer une réservation
       description: Permet à un utilisateur de réserver un appartement entre deux dates spécifiées
+      security:
+        - jwtAuth:
+          - read
+          - write
       requestBody:
         description: clientId, appartId, startDate, endDate, status
         required: true
@@ -683,6 +696,77 @@ paths:
               schema:
                 type: object
                 example: {"error": "Une erreur est survenue durant la création de la réservation"}
+  /apparts/{id}/reservations:
+    get:
+      tags:
+        - Appartement
+      summary: "Récupérer les réservations d'un appartement"
+      description: "Nécessite d'être le propriétaire de l'appartement ou d'être un admin"
+      security:
+        - jwtAuth:
+          - read
+          - write
+      responses:
+        "200":
+          description: "Réservations de l'appartement"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: [{"id": 19,"clientId": 5,"appartId": 2,"startDate": "2024-02-01 00:00:00","endDate": "2024-02-06 00:00:00","totalPrice": 250,"status": "BOOKED"}]
+        "403":
+          description: "Non autorisé"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "Vous n'êtes pas autorisé à appeler l'API."}
+        "500":
+          description: "Erreur interne"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur durant la récupération de la reservation"}
+  /apparts/{id}/dates:
+    get:
+      tags:
+        - Appartement
+      summary: "Récupérer les tranches de dates disponibles d'un appartement"
+      description: "Nécessite d'être authentifié, permet de récupérer les tranches de dates ou le logement est disponible"
+      security:
+        - jwtAuth:
+          - read
+          - write
+      responses:
+        "200":
+          description: "Réservations de l'appartement"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"appartId": "2", "dates": [{"startDate": "2023-12-20 00:00:00", "endDate": "2023-12-25 00:00:00"}, {"startDate": "2024-01-05 00:00:00", "endDate": "2024-02-01 00:00:00"}]}
+        "403":
+          description: "Non autorisé"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"message": "Vous n'êtes pas autorisé à appeler l'API."}
+        "404":
+          description: "Logement non trouvé"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Logement inexistant"}
+        "500":
+          description: "Erreur interne"
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Erreur durant la récupération des dates"}
   /reservation/{id}:
     get: 
       tags: 
@@ -717,6 +801,10 @@ paths:
       - Reservation
       summary: modification des dates de résarvation
       description: Permet à un utilisateur de modifier la date de début ou la date de fin de la réservation
+      security:
+        - jwtAuth:
+          - read
+          - write
       parameters:
         - in: path
           name: id
@@ -752,6 +840,10 @@ paths:
         - Reservation
       summary: Modifier le status d'une reservation donnée
       description: Mettre dans le body l'id de la réservation à modifier
+      security:
+        - jwtAuth:
+          - read
+          - write
       requestBody:
         description: idReservation
         required: true

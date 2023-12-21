@@ -159,8 +159,8 @@ class AppartController{
         try {
             const appartId = req.params.id;
             let result = await this.service.getDatesOfAppart(appartId);
-            if (result) res.status(200).json(result);
-            else res.status(500).json({error: forms.getDatesAppartError});
+            if (result && !result.error) res.status(200).json(result);
+            else res.status(404).json({error: result.error});
         } catch (error) {
             console.log("Erreur controleur getDatesOfAppart : ", error);
             res.status(500).json({error: forms.getDatesAppartError});
