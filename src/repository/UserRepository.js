@@ -1,5 +1,6 @@
 const DatabaseConnection    = require("./Database");
 const userKeys              = require("../utils/form.json").usersKeysDb;
+const defaultKeyUser        = require("../utils/form.json").defaultKeyUser;
 
 class UserRepository {
     db;
@@ -12,6 +13,16 @@ class UserRepository {
         const sqlQuery = "SELECT id, username, name, lastname, rank, email FROM users WHERE id = ?";
         return new Promise((resolve, reject) => {
             this.db.query(sqlQuery, [userId], (error, result) => {
+                if (error) throw error;
+                resolve(result[0]);
+            });
+        });
+    }
+
+    getUserByUsername(username) {
+        const sqlQuery = "SELECT id, username FROM users WHERE username = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [username], (error, result) => {
                 if (error) throw error;
                 resolve(result[0]);
             });
@@ -51,7 +62,7 @@ class UserRepository {
 
     createUser(userData) {
         const sqlQuery = `INSERT INTO users (${userKeys}) VALUES (?,?,?,?,?,?)`;
-        for (const key in userKeys) if (userData[userKeys[key]] === undefined) userData[userKeys[key]] = "null";
+        for (const key in userKeys) if (userData[userKeys[key]] === undefined) userData[userKeys[key]] = defaultKeyUser[userKeys[key]];
         return new Promise((resolve, reject) => {
             this.db.execute(sqlQuery, Object.values(userData), (error, result) => {
                 if (error) throw (error);

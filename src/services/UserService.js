@@ -67,7 +67,10 @@ class UserService {
         try {
             let returnVal = false;
             if (utilService.checkKeysInData(registerData, form.requiredRegisterKeys, form.requiredRegisterKeys)) {
+                const checkUser = await this.userRepository.getUserByUsername(registerData.username);
+                if (checkUser.id) return {error: "Utilisateur existant"};
                 registerData.password = sha512(registerData.password);
+                registerData.rank = "user";
                 const resDb = await this.userRepository.createUser(registerData);
                 if (resDb.affectedRows) returnVal = this.generateKey(resDb.insertId, registerData.username, "user");
             }
@@ -105,7 +108,7 @@ class UserService {
                     for (const user in returnVal) returnVal[user].infos = `${baseUrl}/users/${returnVal[user].id}`;
                 }
             }
-            return returnVal;
+            return (returnVal.length) ? returnVal : {message: form.userNotFound};
         } catch (error) {
             console.log(error);
             return false;
@@ -138,16 +141,16 @@ class UserService {
                 for (const key in data.body)
                     if (!authorized.includes(key)) return form.missingOrBadData;
 
-                if (data.isAdmin || data.userId == userId) {
+                if (data.isAdmin || data.userIdReq == userId) {
                     if (data.body.password) data.body.password = sha512(data.body.password);
                     const resDb = await this.userRepository.patchUserById(userId, data.body);
                     return (resDb.affectedRows) ? 
                     {link:`${baseUrl}/users/${data.userId}`, method: "GET"} : "Modification impossible";
                 } else {
-                    return "Vous n'êtes pas habilité à faire cette action.";
+                    return {error: "Vous n'êtes pas habilité à faire cette action"};
                 }
             } else {
-                return form.missingOrBadData;
+                return {error: form.missingOrBadData};
             }
         } catch (error) {
             console.log(error);
