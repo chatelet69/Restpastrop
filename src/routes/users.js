@@ -10,11 +10,11 @@ const userController            = new UserController();
 
 // Get method
 
-router.get("/users", [authMiddleware, authorizationMiddleware], (req, res) => {
+router.get("/users", [authMiddleware, authorizationMiddleware, authAdminMiddleware], (req, res) => {
     userController.getAllUsers(req, res);
 });
 
-router.get("/users/:id", [authMiddleware, authAdminMiddleware], (req, res) => {
+router.get("/users/:id", [authMiddleware, authorizationMiddleware, authAdminMiddleware], (req, res) => {
     userController.getUserById(req, res);
 });
 
@@ -34,10 +34,10 @@ router.post("/login", userController.authLogin);
 
 // Delete Method
 
-router.delete("/users/:id", [authMiddleware, authAdminMiddleware], userController.deleteUser);
+router.delete("/users/:id", [authMiddleware, authorizationMiddleware, authAdminMiddleware], userController.deleteUser);
 
 // Patch Method
 
-router.patch("/users/:id", [authMiddleware, checkIfAdmin], userController.patchUser);
+router.patch("/users/:id", [authMiddleware, authorizationMiddleware, checkIfAdmin], userController.patchUser);
 
 module.exports = router;

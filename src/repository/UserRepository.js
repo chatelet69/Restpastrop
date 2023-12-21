@@ -19,6 +19,16 @@ class UserRepository {
         });
     }
 
+    getUserByUsername(username) {
+        const sqlQuery = "SELECT id, username FROM users WHERE username = ?";
+        return new Promise((resolve, reject) => {
+            this.db.query(sqlQuery, [username], (error, result) => {
+                if (error) throw error;
+                resolve(result[0]);
+            });
+        });
+    }
+
     checkLogin(username, password) {
         const sqlQuery = "SELECT id, username, name, lastname, rank, email FROM users" 
             + " WHERE username = ? AND password = ?";
