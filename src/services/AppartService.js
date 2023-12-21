@@ -32,9 +32,9 @@ class AppartService {
 
     async getAppartById(appartId) {
         try {
-            let appart = await this.repository.getAppartById(appartId);
-            if (Object.keys(appart).length) appart.specs = `${baseUrl}/apparts/${appart.id}/specs`;
-            return appart;
+            let [appart] = await this.repository.getAppartById(appartId);
+            if (appart !== undefined) appart.specs = `${baseUrl}/apparts/${appart.id}/specs`;
+            return (appart !== undefined) ? appart : {error: form.appartInexistant};
         } catch (error) {
             console.log("Une erreur est survenue lors de la recupération du logement : ", error);
             return false;
@@ -42,7 +42,7 @@ class AppartService {
     }
 
     async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people, userRank, userId, startDate, endDate) {
-        
+        // Code de Mathis
         if (typeof title === 'string' && typeof address === 'string') {
             if(!idOwner) idOwner = userId;
             if(userRank === "admin"){
@@ -56,8 +56,9 @@ class AppartService {
             }
             if (!isNaN(idOwner) && !isNaN(price) && !isNaN(area) && !isNaN(nb_rooms) && !isNaN(max_people)) {
                 
-                if (idOwner>0) {
-                    let results = await this.repository.createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people);
+                if (idOwner > 0) {
+                    let data = [idOwner, title, address, status, price, area, nb_rooms, max_people, startDate, endDate];
+                    let results = await this.repository.createAppart(data);
                     if (!results) {
                         return false;
                     }else{
@@ -115,7 +116,7 @@ class AppartService {
             if (appart !== undefined && Object.keys(appart).length) {
                 if (appart.owner != userId && !isAdmin) return "Permission refusée";
                 const resDb = await this.repository.editAppart(appartId, newData);
-                if (resDb.affectedRows > 0) return {message: "Logement édité", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
+                if (resDb.affectedRows > 0) return {message: "Logement édité", info:{link: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
             }
             return appartInexistant;
         } catch (error) {
@@ -137,7 +138,7 @@ class AppartService {
                     let newRank = "owner";
                     const resOwner = await this.userRepo.changeRankById(newRank, idOwner[0]['owner'])
                     if (resOwner.affectedRows>0) {
-                        return {message: "Logement validé", info:{lien: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
+                        return {message: "Logement validé", info:{link: `${baseUrl}/apparts/${appartId}` , method: "GET"}};
                     }else{
                         return false;
                     }
@@ -176,13 +177,8 @@ class AppartService {
     async getSpecByAppart(appartId){
         try{
            const result = await this.repository.getSpecByAppart(appartId);
-           if (result.length == 0){
-                return {
-                    message :`L'appartement ${appartId} n'a pas de spécificité.`
-                }
-           }else{
-                return result[0]
-           }
+           if (result.length == 0) return {error:"L'appartement n'a pas de spécificité"};
+           else return result[0];
         } catch (error){
             console.log("Error at GetSpecByAppart : ", error);
             return false;
@@ -213,6 +209,8 @@ class AppartService {
             if (appart && appart.id == appartId) {
                 const resDb = await this.repository.getReservDatesOfAppart(appartId);
                 const availability = {start: appart.startDate, end: appart.endDate};
+                console.log(appart);
+                if (resDb.length == 0) return {appartId: appartId, dates: availability};
                 const availableDates = this.getAvailableDateRanges(availability, resDb);
                 return {appartId: appartId, dates: availableDates};
             } else {

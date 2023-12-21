@@ -34,7 +34,7 @@ class ReservationService {
                         return {
                             message: "Logement réservé",
                             viewReservation: {
-                                lien: `${baseUrl}/reservation/${booked.insertId}`,
+                                link: `${baseUrl}/reservation/${booked.insertId}`,
                                 method: "GET"
                                   }      // Renvoie l'id de la ligne insérée
                         };

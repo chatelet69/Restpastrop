@@ -85,8 +85,6 @@ paths:
       tags:
         - "Utilisateurs et Authentification"
       security:
-        - jwtAuth: [admin]
-        - authJwt: [admin]
         - jwtAuth:
             - read
             - write
@@ -121,9 +119,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/user'
+                $ref: '#/components/schemas/users'
         "500":
           description: Erreur interne
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Une erreur est survenue durant la récupération de tous les users"}
   /users/{id}:
     get:
       summary: Récupérer un utilisateur
@@ -154,6 +157,207 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/errorGetUser'
+    patch: 
+      summary: Modifier un utilisateur
+      description: Modifie l'utilisateur identifié par son ID. L'utilisateur peut modifier n'importe quelle information de son compte
+      tags:
+        - Utilisateurs et Authentification
+      security:
+        - jwtAuth:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID de l'utilisateur à modifier
+      requestBody:
+        $ref: '#/components/requestBodies/patchUser'
+      responses:
+        "200":
+          description: Modification validée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Modification réalisée avec succès !"}
+        "403":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Non autorisé"}
+        "404":
+          description: Utilisateur introuvable
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {error: "Cet utilisateur n'existe pas"}
+        "500":
+          description: Erreur interne
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {error: "Une erreur est survenue durant la suppression"}
+    delete:
+      summary: Supprimer un utilisateur
+      description: Supprime l'utilisateur identifié par son ID
+      tags:
+        - Administration
+      security:
+        - jwtAuth:
+            - read
+            - write
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: ID de l'utilisateur à supprimer
+      responses:
+        "200":
+          description: Suppression validée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Suppression validée avec succès"}
+        "403":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Non autorisé"}
+        "404":
+          description: Utilisateur introuvable
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {error: "Cet utilisateur n'existe pas"}
+        "500":
+          description: Erreur interne
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {error: "Une erreur est survenue durant la suppression"}
+  /users/create:
+    post:
+      tags:
+        - Administration
+      summary: Créer un utilisateur
+      description: Permet à un administrateur de créer un utilisateur
+      security:
+        - jwtAuth:
+            - read
+            - write
+      requestBody:
+        $ref: '#/components/requestBodies/createUser'
+      responses:
+        "200":
+          description: Utilisateur créé
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Utilisateur créé"}
+        "400":
+          description: Requête possiblement mal formée
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Erreur durant la création"}
+        "403":
+          description: Non autorisé
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {message: "Non autorisé"}
+        "500":
+          description: Erreur interne
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {error: "Une erreur est survenue durant la création"}
+  /users/search/by:
+    get:
+      tags:
+        - Administration
+      summary: Chercher un/des utilisateur(s)
+      description: Permet de chercher des utilisateurs correspondant aux critères de recherche
+      security:
+        - jwtAuth:
+            - read
+            - write
+      parameters:
+        - in: query
+          name: userId
+          schema:
+            type: integer
+          description: L'identifiant de l'utilisateur
+        - in: query
+          name: username
+          schema:
+            type: string
+            example: "john10"
+          description: Le pseudo
+        - in: query
+          name: email
+          schema:
+            type: string
+            example: "john@gmail.com"
+          description: L'email
+        - in: query
+          name: name
+          schema:
+            type: string
+            example: "john"
+          description: Le prénom
+        - in: query
+          name: rank
+          schema:
+            type: string
+            example: "admin"
+          description: Le rang
+        - in: query
+          name: lastname
+          schema:
+            type: string
+            example: "Doe"
+          description: Le nom
+      responses:
+        "200":
+          description: Utilisateur(s) récupéré(s)
+          content:
+            application/json:
+              schema:
+                type: object
+                example: [{"id": 5, "username": "kevin", infos: "https://larche.ovh/users/5"}, {"id": 6, "username": "manon", infos: "https://larche.ovh/users/6"}]
+        "400":
+          description: Paramères manquants
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Paramètres de recherche manquants"}
+        "500":
+          description: Erreur interne
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {"error": "Une erreur est survenue durant la recherche"}
   /apparts:
     get:
       tags:
@@ -310,7 +514,7 @@ paths:
                 type: object
                 example: {"error": "Une erreur est survenue durant la validation du logement"}
 
-  /apparts/search/by?params=value:
+  /apparts/search/by:
     get:
       tags:
         - Appartements
@@ -472,20 +676,76 @@ paths:
                 example: {"error": "Erreur durant l'annulation de la réservation"}
     
 
-
-
-  
-
-
 components:
+  # Params
+  # ReqBody
+  requestBodies:
+    createUser:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: "object"
+            required:
+                - username
+                - password
+                - email
+                - name
+                - lastname
+                - rank
+            properties:
+              username:
+                type: "string"
+                description: "Pseudo"
+              email:
+                type: "string"
+                format: "email"
+                description: "Email"
+              name:
+                type: "string"
+                description: "Prénom"
+              lastname:
+                type: "string"
+                description: "Nom de famille"
+              password:
+                type: "string"
+                description: "Mot de passe"
+              rank:
+                type: "string"
+                description: "Rang"
+      required: true
+    patchUser:
+      content:
+        application/x-www-form-urlencoded:
+          schema:
+            type: "object"
+            properties:
+              username:
+                type: "string"
+                description: "Pseudo"
+              email:
+                type: "string"
+                format: "email"
+                description: "Email"
+              name:
+                type: "string"
+                description: "Prénom"
+              lastname:
+                type: "string"
+                description: "Nom de famille"
+              password:
+                type: "string"
+                description: "Mot de passe"
+      required: true
+  # Security
   securitySchemes:
-    authJwt: 
+    authJwt:
       type: http
       scheme: jwt
     jwtAuth:
       type: apiKey
       in: header
       name: Authorization
+  # Schémas
   schemas:
     errorGetUser:
       type: object

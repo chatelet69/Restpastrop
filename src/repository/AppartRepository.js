@@ -56,11 +56,15 @@ class AppartRepository {
         });
     }
 
-    async createAppart(idOwner, title, address, status, price, area, nb_rooms, max_people) {
+    async createAppart(data) {
+        const sqlQuery = "INSERT INTO apparts (owner, title, address, status, price, area, nb_rooms, max_people, startDate, endDate)" +
+        " VALUES (?,?,?,?,?,?,?,?,?,?) RETURNING *";
         return new Promise ((resolve, reject) => {
-            this.db.query("INSERT INTO apparts (owner, title, address, status, price, area, nb_rooms, max_people) VALUES (?,?,?,?,?,?,?,?) RETURNING *", [idOwner,title,address,status,price,area,nb_rooms,max_people], (error, results) => {
+            this.db.query(sqlQuery, data, (error, results) => {
                 if (error) reject(error);
-                console.log(results)
+                this.db.query("INSERT INTO specApparts (appartId) VALUES (?)", [results[0].id], (error, results) => {
+                    if (error) throw error;
+                });
                 resolve(results);
             });
         });

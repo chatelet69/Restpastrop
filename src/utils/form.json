@@ -8,6 +8,9 @@
     "requiredRegisterKeys": [
         "username", "password", "email", "name", "lastname"
     ],
+    "authorizedKeysSearchUser": [
+        "username", "rank", "email", "name", "lastname"
+    ],
     "editReservationError": "Erreur durant la modification de la réservation",
     "getReservationError": "Erreur durant la récupération de la reservation",
     "getDatesAppartError": "Erreur durant la récupération des dates",
@@ -15,5 +18,8 @@
     "getAppartError": "Erreur durant la récupération du logement",
     "editAppartError": "Une erreur est survenue durant la modification du logement",
     "appartInexistant": "Logement inexistant",
-    "unfoundOrNoPerms": "Inexistant ou droits insuffisants"
+    "unfoundOrNoPerms": "Inexistant ou droits insuffisants",
+    "missingOrBadData": "Données manquantes ou erronées",
+    "userNotFound": "Cet utilisateur n'existe pas",
+    "errorCreateUser": "Erreur durant la création de l'utilisateur"
 }
