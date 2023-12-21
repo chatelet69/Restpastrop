@@ -14,7 +14,12 @@ class ReservationController {
                 endDate : req.body.endDate,
             }
             const result = await reservationService.bookAppart(data);
-            res.status(200).json(result);
+            console.log(result.error);
+            if (result.error){
+                res.status(400).json(result);
+            }else {
+                res.status(200).json(result)
+            }
         } catch (error) {
             console.log(error);
             res.status(500).json({error: `Une erreur est survenue durant la création de la réservation`});
@@ -29,7 +34,11 @@ class ReservationController {
                 isAdmin : req.user.isAdmin
             };
             const result = await reservationService.cancelReservation(data.idUser, data.idReservation, data.isAdmin);
-            res.status(200).json(result);
+            if (result.error) {
+                res.status(400).json(result);
+            }else {
+                res.status(200).json(result)
+            }
         } catch (error) {
             console.log(error);
             res.status(500).json({error: "Erreur durant l'annulation de la réservation"});
@@ -42,6 +51,7 @@ class ReservationController {
             const userId = req.user.userId;
             const isAdmin = req.user.isAdmin;
             const result = await reservationService.getReservation(idReservation, userId, isAdmin);
+            console.log(result);
             if (result) res.status(200).json(result);
             else res.status(500).json({error: getReservationError});
         } catch (error) {
@@ -57,7 +67,7 @@ class ReservationController {
             const userId = req.user.userId;
             const resId = req.params.id;
             const result = await reservationService.editReservation(resId, userId, editData, isAdmin);
-            if (result) res.status(200).json(result);
+            if (!result.error) res.status(200).json(result);
             else res.status(500).json({error: editReservationError});
         } catch (error) {
             console.log(error);
