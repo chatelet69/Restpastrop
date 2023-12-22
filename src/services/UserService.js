@@ -68,7 +68,7 @@ class UserService {
             let returnVal = false;
             if (utilService.checkKeysInData(registerData, form.requiredRegisterKeys, form.requiredRegisterKeys)) {
                 const checkUser = await this.userRepository.getUserByUsername(registerData.username);
-                if (checkUser.id) return {error: "Utilisateur existant"};
+                if (checkUser && checkUser.id) return {error: "Utilisateur existant"};
                 registerData.password = sha512(registerData.password);
                 registerData.rank = "user";
                 const resDb = await this.userRepository.createUser(registerData);
